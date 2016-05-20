@@ -3,8 +3,9 @@ Type: Package
 Title: models 1/f noise + deterministic oscillations
 Version: 0.1.0
 Author: Constantino Antonio Garcia Martinez
-Maintainer: constantinoantonio.garcia@usc.es
-Description:  Model complex systems consisting on 1/f noises and nonlinear deterministic
-oscillations
+Maintainer: Constantino A. Garcia <constantinoantonio.garcia@usc.es>
+Description: Model complex systems consisting on 1/f noises and nonlinear
+    deterministic oscillations
 License: GPL-3
 LazyData: TRUE
+RoxygenNote: 5.0.1
