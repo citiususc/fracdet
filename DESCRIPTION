@@ -9,3 +9,4 @@ Description: Model complex systems consisting on 1/f noises and nonlinear
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1
+LinkingTo: RcppArmadillo, RcppGSL, Rcpp
