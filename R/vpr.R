@@ -104,20 +104,31 @@ lines.vpr = function(x, ...){
 
 
 # Theoretical expression of vpr -----------------------------------------------
-
 # private function
 # get wavelet filters
-getWaveletFilters <- function(filter.number = 1, family = "DaubExPhase"){
-  h <- wavethresh::filter.select(filter.number = filter.number,
+
+getWaveletFilters = function(family, filter_number){
+  h = wavethresh::filter.select(filter.number = filter_number,
                                  family = family)$H
-  len <- length(h)
+  len = length(h)
   # Definition of g[n]:
   # g[n] = (-1) ^ (1 - n) * h[1 - n]
-  index <- 1 - (len - 1):0
-  g <- rev(h) * (-1) ^ (1 - index)
+  index = 1 - (len - 1):0
+  g = rev(h) * (-1) ^ (1 - index)
   list(h = h, g = g)
 }
 
+
+#' @export
+#' @useDynLib fracdet
+theoreticalVpr = function(H, sigma2, family, filter_number, nlevels) {
+  filters = getWaveletFilters(family = family,
+                              filter_number = filter_number)
+  vpr(.Call('fracdet_theoreticalVprCpp', PACKAGE = 'fracdet',
+            filters$g, filters$h, H, sigma2, nlevels),
+      family = family,
+      filter_number = filter_number)
+}
 
 
 

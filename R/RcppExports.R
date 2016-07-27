@@ -5,7 +5,7 @@ qawf_integral <- function(alpha, lower, upper, abs_tol = 0.0, rel_tol = 1e-7, si
     .Call('fracdet_qawf_integral', PACKAGE = 'fracdet', alpha, lower, upper, abs_tol, rel_tol, size)
 }
 
-theoreticalVpr <- function(gr, hr, H, sigma2, nlevels) {
-    .Call('fracdet_theoreticalVpr', PACKAGE = 'fracdet', gr, hr, H, sigma2, nlevels)
+theoreticalVprCpp <- function(gr, hr, H, sigma2, nlevels) {
+    .Call('fracdet_theoreticalVprCpp', PACKAGE = 'fracdet', gr, hr, H, sigma2, nlevels)
 }
 
