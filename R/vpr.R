@@ -1,0 +1,124 @@
+
+# constructors of the vpr class  -----------------------------------------------
+
+#' @export
+#' @import wavethresh
+vpr = function(x, ...){
+  UseMethod("vpr")
+}
+
+
+#' Constructor of the vpr class from a vector
+#' @export
+vpr.default = function(vpr_vector, family, filter_number){
+  names(vpr_vector) = 0:(length(vpr_vector) - 1)
+  class(vpr_vector) = c("vpr", class(vpr_vector))
+  attr(vpr_vector, "wt_info") = list(family = family,
+                                     filter_number = filter_number)
+  vpr_vector
+}
+
+#' constructor of the vpr class from a wavethresh::wd object
+#' @export
+vpr.wd = function(wx){
+  kMIN_POINTS = 5
+  if (!inherits(wx, "wd")) {
+    stop("wx is not an \"wd\" object")
+  }
+  wx_nlevels = wavethresh::nlevelsWT(wx)
+  vpr_vector = rep(0.0, wx_nlevels)
+
+  filter_len = length(
+    wavethresh::filter.select(
+      filter.number = wx$filter$filter.number,
+      family = wx$filter$family
+    )$H
+  )
+  # first index unaffected by the circularity assumption of the wavelet transform
+  unaffected_index =  ceiling( (filter_len - 2) * (1 - 1 / 2 ^ (wx_nlevels:1)) )
+
+  # estimate the variance of the resolution level 0 ...
+  vpr_vector[[1]] = wavethresh::accessD(wx, 0) ^ 2
+  # ... and loop for the remainder levels
+  resolution_levels = 0:(wx_nlevels - 1)
+  for (i in 2:wx_nlevels) {
+    available_points = (2 ^ resolution_levels[[i]] - 2 * unaffected_index[[i]])
+    if (available_points >  kMIN_POINTS) {
+      segment_index = unaffected_index[[i]]:(2 ^ resolution_levels[[i]] -
+                                               unaffected_index[[i]])
+      vpr_vector[[i]] = var(wavethresh::accessD(wx,
+                                                resolution_levels[[i]])[segment_index])
+
+    }else {
+      # not enough points for a variance-estimation free from the circularity
+      # assumption: we use all points of the level
+      vpr_vector[[i]] = var(wavethresh::accessD(wx, resolution_levels[[i]]))
+    }
+
+  }
+
+  vpr.default(vpr_vector, family = wx$filter$family, filter_number = wx$filter$filter.number)
+}
+
+# Accesing attributes of the vpr class ------------------------------------
+
+#' @export
+resolutionLevels = function(x, ...){
+  UseMethod("resolutionLevels")
+}
+
+#' @export
+resolutionLevels.vpr = function(x){
+  0:(length(x) - 1)
+}
+
+#' @export
+wtInfo = function(x, ...){
+  UseMethod("wtInfo")
+}
+
+#' @export
+wtInfo.vpr = function(x){
+  attr(x, "wt_info")
+}
+
+# Plotting functions for vpr class ----------------------------------------
+
+#' @export
+plot.vpr = function(x, main = "Variance per Resolution Level",
+                    xlab = "Wavelet Resolution Level",
+                    ylab = "Variance", log = "y", ...){
+  plot(resolutionLevels(x), as.numeric(x), main = main, xlab = xlab, ylab = ylab,
+       log = log, ...)
+}
+
+#' @export
+points.vpr = function(x, ...) {
+  points(resolutionLevels(x), as.numeric(x), ...)
+}
+
+#' @export
+lines.vpr = function(x, ...){
+  lines(resolutionLevels(x), as.numeric(x), ...)
+}
+
+
+# Theoretical expression of vpr -----------------------------------------------
+
+# private function
+# get wavelet filters
+getWaveletFilters <- function(filter.number = 1, family = "DaubExPhase"){
+  h <- wavethresh::filter.select(filter.number = filter.number,
+                                 family = family)$H
+  len <- length(h)
+  # Definition of g[n]:
+  # g[n] = (-1) ^ (1 - n) * h[1 - n]
+  index <- 1 - (len - 1):0
+  g <- rev(h) * (-1) ^ (1 - index)
+  list(h = h, g = g)
+}
+
+
+
+
+
