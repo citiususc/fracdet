@@ -23,3 +23,18 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// theoreticalVpr
+NumericVector theoreticalVpr(NumericVector& gr, NumericVector& hr, double H, double sigma2, int nlevels);
+RcppExport SEXP fracdet_theoreticalVpr(SEXP grSEXP, SEXP hrSEXP, SEXP HSEXP, SEXP sigma2SEXP, SEXP nlevelsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector& >::type gr(grSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type hr(hrSEXP);
+    Rcpp::traits::input_parameter< double >::type H(HSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma2(sigma2SEXP);
+    Rcpp::traits::input_parameter< int >::type nlevels(nlevelsSEXP);
+    __result = Rcpp::wrap(theoreticalVpr(gr, hr, H, sigma2, nlevels));
+    return __result;
+END_RCPP
+}
