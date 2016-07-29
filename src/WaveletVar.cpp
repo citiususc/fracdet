@@ -44,7 +44,7 @@ arma::vec downsampleSymmetricSignal(const arma::vec &x, int first_index) {
 }
 
 // [[Rcpp::export]]
-NumericVector theoreticalVprCpp(NumericVector& gr, NumericVector& hr,
+NumericVector theoreticalWaveletVarCpp(NumericVector& gr, NumericVector& hr,
                       double H, double sigma2, int nlevels) {
   arma::vec g(gr.begin(), gr.size(), false);
   arma::vec h(hr.begin(), hr.size(), false);

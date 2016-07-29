@@ -1,32 +1,32 @@
 
-# constructors of the vpr class  -----------------------------------------------
+# constructors of the WaveletVar class  -----------------------------------------------
 
 #' @export
 #' @import wavethresh
-vpr = function(x, ...){
-  UseMethod("vpr")
+WaveletVar = function(x, ...){
+  UseMethod("WaveletVar")
 }
 
 
-#' Constructor of the vpr class from a vector
+#' Constructor of the WaveletVar class from a vector
 #' @export
-vpr.default = function(vpr_vector, family, filter_number){
-  names(vpr_vector) = 0:(length(vpr_vector) - 1)
-  class(vpr_vector) = c("vpr", class(vpr_vector))
-  attr(vpr_vector, "wt_info") = list(family = family,
+WaveletVar.default = function(vpr, family, filter_number){
+  names(vpr) = 0:(length(vpr) - 1)
+  class(vpr) = c("WaveletVar", class(vpr))
+  attr(vpr, "wt_info") = list(family = family,
                                      filter_number = filter_number)
-  vpr_vector
+  vpr
 }
 
-#' constructor of the vpr class from a wavethresh::wd object
+#' constructor of the WaveletVar class from a wavethresh::wd object
 #' @export
-vpr.wd = function(wx){
+WaveletVar.wd = function(wx){
   kMIN_POINTS = 5
   if (!inherits(wx, "wd")) {
     stop("wx is not an \"wd\" object")
   }
   wx_nlevels = wavethresh::nlevelsWT(wx)
-  vpr_vector = rep(0.0, wx_nlevels)
+  vpr = rep(0.0, wx_nlevels)
 
   filter_len = length(
     wavethresh::filter.select(
@@ -38,7 +38,7 @@ vpr.wd = function(wx){
   unaffected_index =  ceiling( (filter_len - 2) * (1 - 1 / 2 ^ (wx_nlevels:1)) )
 
   # estimate the variance of the resolution level 0 ...
-  vpr_vector[[1]] = wavethresh::accessD(wx, 0) ^ 2
+  vpr[[1]] = wavethresh::accessD(wx, 0) ^ 2
   # ... and loop for the remainder levels
   resolution_levels = 0:(wx_nlevels - 1)
   for (i in 2:wx_nlevels) {
@@ -46,21 +46,23 @@ vpr.wd = function(wx){
     if (available_points >  kMIN_POINTS) {
       segment_index = unaffected_index[[i]]:(2 ^ resolution_levels[[i]] -
                                                unaffected_index[[i]])
-      vpr_vector[[i]] = var(wavethresh::accessD(wx,
+      vpr[[i]] = var(wavethresh::accessD(wx,
                                                 resolution_levels[[i]])[segment_index])
 
     }else {
       # not enough points for a variance-estimation free from the circularity
       # assumption: we use all points of the level
-      vpr_vector[[i]] = var(wavethresh::accessD(wx, resolution_levels[[i]]))
+      vpr[[i]] = var(wavethresh::accessD(wx, resolution_levels[[i]]))
     }
 
   }
 
-  vpr.default(vpr_vector, family = wx$filter$family, filter_number = wx$filter$filter.number)
+  WaveletVar.default(vpr,
+                     family = wx$filter$family,
+                     filter_number = wx$filter$filter.number)
 }
 
-# Accesing attributes of the vpr class ------------------------------------
+# Accesing attributes of the WaveletVar class ------------------------------------
 
 #' @export
 resolutionLevels = function(x, ...){
@@ -68,7 +70,7 @@ resolutionLevels = function(x, ...){
 }
 
 #' @export
-resolutionLevels.vpr = function(x){
+resolutionLevels.WaveletVar = function(x){
   0:(length(x) - 1)
 }
 
@@ -78,14 +80,14 @@ wtInfo = function(x, ...){
 }
 
 #' @export
-wtInfo.vpr = function(x){
+wtInfo.WaveletVar = function(x){
   attr(x, "wt_info")
 }
 
-# Plotting functions for vpr class ----------------------------------------
+# Plotting functions for WaveletVar class ----------------------------------------
 
 #' @export
-plot.vpr = function(x, main = "Variance per Resolution Level",
+plot.WaveletVar = function(x, main = "Variance per Resolution Level",
                     xlab = "Wavelet Resolution Level",
                     ylab = "Variance", log = "y", ...){
   plot(resolutionLevels(x), as.numeric(x), main = main, xlab = xlab, ylab = ylab,
@@ -93,17 +95,17 @@ plot.vpr = function(x, main = "Variance per Resolution Level",
 }
 
 #' @export
-points.vpr = function(x, ...) {
+points.WaveletVar = function(x, ...) {
   points(resolutionLevels(x), as.numeric(x), ...)
 }
 
 #' @export
-lines.vpr = function(x, ...){
+lines.WaveletVar = function(x, ...){
   lines(resolutionLevels(x), as.numeric(x), ...)
 }
 
 
-# Theoretical expression of vpr -----------------------------------------------
+# Theoretical expression of WaveletVar -----------------------------------------------
 # private function
 # get wavelet filters
 
@@ -121,13 +123,13 @@ getWaveletFilters = function(family, filter_number){
 
 #' @export
 #' @useDynLib fracdet
-theoreticalVpr = function(H, sigma2, family, filter_number, nlevels) {
+theoreticalWaveletVar = function(H, sigma2, family, filter_number, nlevels) {
   filters = getWaveletFilters(family = family,
                               filter_number = filter_number)
-  vpr(.Call('fracdet_theoreticalVprCpp', PACKAGE = 'fracdet',
-            filters$g, filters$h, H, sigma2, nlevels),
-      family = family,
-      filter_number = filter_number)
+  WaveletVar(.Call('fracdet_theoreticalWaveletVarCpp', PACKAGE = 'fracdet',
+                   filters$g, filters$h, H, sigma2, nlevels),
+             family = family,
+             filter_number = filter_number)
 }
 
 
