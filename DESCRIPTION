@@ -1,7 +1,7 @@
 Package: fracdet
 Type: Package
 Title: models 1/f noise + deterministic oscillations
-Version: 0.1.0
+Version: 0.0.1
 Author: Constantino Antonio Garcia Martinez
 Maintainer: Constantino A. Garcia <constantinoantonio.garcia@usc.es>
 Description: Model complex systems consisting on 1/f noises and nonlinear
@@ -9,5 +9,6 @@ Description: Model complex systems consisting on 1/f noises and nonlinear
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1
+Depends: wavethresh, Rcpp
 LinkingTo: RcppArmadillo, RcppGSL, Rcpp
 Suggests: testthat
