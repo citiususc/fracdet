@@ -23,9 +23,9 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// theoreticalVprCpp
-NumericVector theoreticalVprCpp(NumericVector& gr, NumericVector& hr, double H, double sigma2, int nlevels);
-RcppExport SEXP fracdet_theoreticalVprCpp(SEXP grSEXP, SEXP hrSEXP, SEXP HSEXP, SEXP sigma2SEXP, SEXP nlevelsSEXP) {
+// theoreticalWaveletVarCpp
+NumericVector theoreticalWaveletVarCpp(NumericVector& gr, NumericVector& hr, double H, double sigma2, int nlevels);
+RcppExport SEXP fracdet_theoreticalWaveletVarCpp(SEXP grSEXP, SEXP hrSEXP, SEXP HSEXP, SEXP sigma2SEXP, SEXP nlevelsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -34,7 +34,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type H(HSEXP);
     Rcpp::traits::input_parameter< double >::type sigma2(sigma2SEXP);
     Rcpp::traits::input_parameter< int >::type nlevels(nlevelsSEXP);
-    __result = Rcpp::wrap(theoreticalVprCpp(gr, hr, H, sigma2, nlevels));
+    __result = Rcpp::wrap(theoreticalWaveletVarCpp(gr, hr, H, sigma2, nlevels));
     return __result;
 END_RCPP
 }
