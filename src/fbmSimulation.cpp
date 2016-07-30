@@ -12,7 +12,8 @@ NumericVector computeFgnCov(int n, double H){
   return fgn_cov;
 }
 
-
+// Functor to sum two vectors a and b after multiplying them by some factors
+// factor_a * a + factor_b * b
 class MultiplyVectorsAndSum {
 private:
   double factor_a;
