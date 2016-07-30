@@ -11,7 +11,6 @@ test_that("theoretical vpr works properly (intensive)", {
                                 nlevels = data[i,"nlevels"])
     expect_equal(as.numeric(data[i,"vpr"][[1]]),
                  as.numeric(vpr))
-    
   }
 })
 

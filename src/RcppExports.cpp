@@ -23,18 +23,6 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// simulateFbmCpp
-NumericVector simulateFbmCpp(int n, double H);
-RcppExport SEXP fracdet_simulateFbmCpp(SEXP nSEXP, SEXP HSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< double >::type H(HSEXP);
-    __result = Rcpp::wrap(simulateFbmCpp(n, H));
-    return __result;
-END_RCPP
-}
 // theoreticalWaveletVarCpp
 NumericVector theoreticalWaveletVarCpp(NumericVector& gr, NumericVector& hr, double H, double sigma2, int nlevels);
 RcppExport SEXP fracdet_theoreticalWaveletVarCpp(SEXP grSEXP, SEXP hrSEXP, SEXP HSEXP, SEXP sigma2SEXP, SEXP nlevelsSEXP) {
