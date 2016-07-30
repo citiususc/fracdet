@@ -7,6 +7,21 @@
 
 using namespace Rcpp;
 
+// theoreticalWaveletVarCpp
+NumericVector theoreticalWaveletVarCpp(NumericVector& gr, NumericVector& hr, double H, double sigma2, int nlevels);
+RcppExport SEXP fracdet_theoreticalWaveletVarCpp(SEXP grSEXP, SEXP hrSEXP, SEXP HSEXP, SEXP sigma2SEXP, SEXP nlevelsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector& >::type gr(grSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type hr(hrSEXP);
+    Rcpp::traits::input_parameter< double >::type H(HSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma2(sigma2SEXP);
+    Rcpp::traits::input_parameter< int >::type nlevels(nlevelsSEXP);
+    __result = Rcpp::wrap(theoreticalWaveletVarCpp(gr, hr, H, sigma2, nlevels));
+    return __result;
+END_RCPP
+}
 // qawf_integral
 Rcpp::List qawf_integral(double alpha, double lower, double upper, double abs_tol, double rel_tol, unsigned int size);
 RcppExport SEXP fracdet_qawf_integral(SEXP alphaSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP abs_tolSEXP, SEXP rel_tolSEXP, SEXP sizeSEXP) {
@@ -23,18 +38,15 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// theoreticalWaveletVarCpp
-NumericVector theoreticalWaveletVarCpp(NumericVector& gr, NumericVector& hr, double H, double sigma2, int nlevels);
-RcppExport SEXP fracdet_theoreticalWaveletVarCpp(SEXP grSEXP, SEXP hrSEXP, SEXP HSEXP, SEXP sigma2SEXP, SEXP nlevelsSEXP) {
+// simulateFbmCpp
+NumericVector simulateFbmCpp(int n, double H);
+RcppExport SEXP fracdet_simulateFbmCpp(SEXP nSEXP, SEXP HSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< NumericVector& >::type gr(grSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type hr(hrSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< double >::type H(HSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma2(sigma2SEXP);
-    Rcpp::traits::input_parameter< int >::type nlevels(nlevelsSEXP);
-    __result = Rcpp::wrap(theoreticalWaveletVarCpp(gr, hr, H, sigma2, nlevels));
+    __result = Rcpp::wrap(simulateFbmCpp(n, H));
     return __result;
 END_RCPP
 }
