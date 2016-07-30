@@ -5,6 +5,9 @@ qawf_integral <- function(alpha, lower, upper, abs_tol = 0.0, rel_tol = 1e-7, si
     .Call('fracdet_qawf_integral', PACKAGE = 'fracdet', alpha, lower, upper, abs_tol, rel_tol, size)
 }
 
+simulateFbmCpp <- function(n, H) {
+    .Call('fracdet_simulateFbmCpp', PACKAGE = 'fracdet', n, H)
+}
 
 theoreticalWaveletVarCpp <- function(gr, hr, H, sigma2, nlevels) {
     .Call('fracdet_theoreticalWaveletVarCpp', PACKAGE = 'fracdet', gr, hr, H, sigma2, nlevels)
