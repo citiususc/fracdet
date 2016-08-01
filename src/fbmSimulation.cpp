@@ -1,12 +1,11 @@
 #include <Rcpp.h>
-//#include <cstdlib>
 #include <cmath>
 using namespace Rcpp;
 
 NumericVector computeFgnCov(int n, double H){
   NumericVector fgn_cov(n);
   for (int i = 0; i < n; i++){
-    fgn_cov[i] =  (std::pow(std::abs(i - 1), 2 * H) - 2 * std::pow(std::abs(i), 2 * H) + 
+    fgn_cov[i] =  (std::pow(std::abs(i - 1), 2 * H) - 2 * std::pow(std::abs(i), 2 * H) +
       std::pow(std::abs(i + 1), 2 * H)) / 2;
   }
   return fgn_cov;
@@ -16,14 +15,14 @@ NumericVector computeFgnCov(int n, double H){
 // factor_a * a + factor_b * b
 class MultiplyVectorsAndSum {
 private:
-  double factor_a;
-  double factor_b;
-  
+  double mfactor_a;
+  double mfactor_b;
+
 public:
-  MultiplyVectorsAndSum(double x, double y) : factor_a(x), factor_b(y) { }
-  
-  double operator () (const double& a, const double& b) const {
-    return this->factor_a * a + this->factor_b * b;
+  MultiplyVectorsAndSum(double factor_a, double factor_b) : mfactor_a(factor_a), mfactor_b(factor_b) { }
+
+  double operator() (const double& a, const double& b) const {
+    return this->mfactor_a * a + this->mfactor_b * b;
   }
 };
 
@@ -38,11 +37,10 @@ NumericVector simulateFbmCpp(int n, double H) {
   NumericVector v2(n + 1);
   std::copy(v1.begin() + 1, v1.end(), v2.begin() + 1);
   double k =  -v2[1];
-  double aa = std::sqrt(v1[0]);
-  double bb;
+  double sigma = std::sqrt(v1[0]);
   // Levinson's algorithm:
   for(int j = 1; j < n; j++) {
-    aa = aa * sqrt(1 - k * k);
+    sigma = sigma * sqrt(1 - k * k);
     NumericVector v = v1.size() - j;
     std::transform(v1.begin() + j - 1, v1.end() - 1,
                    v2.begin() + j,
@@ -54,12 +52,12 @@ NumericVector simulateFbmCpp(int n, double H) {
                    MultiplyVectorsAndSum(1,k)
     );
     std::copy(v.begin(), v.end(), v1.begin() + j);
-    bb = y[j] / aa;
     std::transform(fgn.begin() + j, fgn.end(),
                    v1.begin() + j,
                    fgn.begin() + j,
-                   MultiplyVectorsAndSum(1,bb));
-    k =  - v2[j + 1] / (aa * aa);
+                   MultiplyVectorsAndSum(1, y[j] / sigma));
+    // update k
+    k =  - v2[j + 1] / (sigma * sigma);
   }
   NumericVector fbm = cumsum(fgn);
   return fbm;
