@@ -2,50 +2,32 @@
 
 #' @export
 Fracdet = function(x, fbmPars) {
-  UseMethod("Fracdet", x)
+  UseMethod("Fracdet", fbmPars)
 }
 
-#' @export
-Fracdet.wd = function(x, fbmPars) {
+# private function
+FracdetFromFit = function(x, fbmPars) {
+  if (!inherits(x, "wd")) {
+    stop("x is not a \"wd\" object")
+  }
   attr(x, "WaveletVar") = WaveletVar.wd(x)
-  # obtain a matrix where the first column represents the estimate of the fbmPars
-  # and the second column the Std. Error
-  parsMatrix = extractFbmPars(fbmPars)
-  attr(x, "fbmPars") = parsMatrix
+  attr(x, "fbmPars") = fbmPars
   class(x) = c("Fracdet", class(x))
   x
 }
 
-extractFbmPars = function(fbmPars) {
-  UseMethod("extractFbmPars", fbmPars)
+#' @export 
+Fracdet.lm = function(x, fbmPars) {
+  FracdetFromFit(x, fbmPars)
 }
 
-extractFbmPars.matrix = function(fbmPars) {
-  if (!all(dim(fbmPars) == c(2, 2))) {
-    stop("Incorrect fbmPars dimensions (expected 2x2)")
-  }
-  rownames(fbmPars) = c("H", "sigma2")
-  colnames(fbmPars) = c("Estimate", "Std. Error")
-  fbmPars
+#' @export 
+Fracdet.nls = function(x, fbmPars) {
+  FracdetFromFit(x, fbmPars)
 }
-
-extractFbmPars.nls = function(fbmPars) {
-  extractFbmParsFromFit(fbmPars)
-}
-
-extractFbmPars.lm = function(fbmPars) {
-  extractFbmParsFromFit(fbmPars)
-}
-
-
-extractFbmParsFromFit = function(fbmPars) {
-  pars = summary(fit)$coefficients[,1:2]
-  stopifnot(rownames(pars) == c("H", "sigma2"))
-  pars
-}
-
 
 # Basic functionality -----------------------------------------------------
+
 #' @export
 getWaveletVar = function(x) {
   UseMethod("getWaveletVar", x)
@@ -56,14 +38,38 @@ getWaveletVar.Fracdet = function(x) {
   attr(x, "WaveletVar")
 }
 
-#' @export
-getFbmPars = function(x) {
+#' @export 
+getFbmPars = function(x){
   UseMethod("getFbmPars", x)
 }
 
 #' @export
-getFbmPars.Fracdet = function(x) {
+getFbmPars.Fracdet = function(x){
   attr(x, "fbmPars")
+}
+
+#' @export
+coef.Fracdet = function(x) {
+  coef(getFbmPars.Fracdet(x))
+}
+
+#' @export 
+getFittedWaveletVar = function(x){
+  UseMethod("getFittedWaveletVar", x)
+}
+
+#' @export
+getFittedWaveletVar.Fracdet = function(x){
+  fbm_pars = coef(x)
+  theoreticalWaveletVar(fbm_pars[["H"]], fbm_pars[["sigma2"]],
+                        x$filter$family, 
+                        x$filter$filter.number,
+                        length(getWaveletVar(x)))
+}
+
+#' @export
+fitted.Fracdet = function(x) {
+  getFittedWaveletVar.Fracdet(x)
 }
 
 
@@ -102,3 +108,72 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 
 
 # estimateDetSignal -----------------------------------------------------------
+
+#' @export
+estimateDetSignal = function(x, ...){ 
+  UseMethod("estimateDetSignal", x)  
+}
+
+#' @export
+estimateDetSignal.Fracdet = function(x, estimate_from, 
+                                     n1 = 5, nsim_bootstrap = 1000,
+                                     amplitude_percentage = 0.01,
+                                     signal_amplitude = NULL) {
+  # extract variables for the sake of clarity
+  vpr = getWaveletVar(x)
+  nlevels = length(vpr)
+  fitted_vpr = getFittedWaveletVar(x)
+  fitted_model = getFbmPars(x)
+  family = x$filter$family
+  filter_number = x$filter$filter.number
+  fitted_vpr_std = bootstrapWaveletVarError(fitted_model, nsim_bootstrap,
+                                            family, filter_number, nlevels)
+  if (is.null(signal_amplitude)) {
+    signal_amplitude = mad(diff(wr(x)))
+  }
+  wavelet_amplitudes = getWaveletAmplitudes(family, filter_number,nlevels)
+  x = as.wd(x)
+  # get the lengths of the wavelet coefficients in each wavelet resolution level
+  details_lengths =  sapply(0:(nlevels - 1), 
+                            FUN = function(rl) {
+                              length(accessD(x, level = rl, boundary = TRUE))
+                            })
+  
+  # assume that the slowest trend is due to the fbm
+  x = putC(x, 
+           level = 0, 
+           rep(0, details_lengths[[1]]),
+           boundary = TRUE)
+  
+  # eliminate all the signal in those levels where the deterministic
+  # contribution is negligible
+  for (rl in setdiff(resolutionLevels(vpr), estimate_from)) {
+    x = putD(x,
+             level = rl,
+             rep(0, details_lengths[[rl + 1]]),
+             boundary = TRUE)
+  }
+  
+  # process those resolution levels with deterministic contributions
+  for (rl in estimate_from) {
+    # check that the fitted variance <= experimental variance
+    # in those resolution levels where we assume there is deterministic 
+    # contribution
+    if (vpr[rl + 1] <= fitted_vpr[rl + 1]) {
+      x = putD(x, level = rl, 
+               rep(0, details_lengths[[rl + 1]]), 
+               boundary = TRUE)
+    } else {
+      priors = getPriors(accessD(x, rl, boundary = TRUE),
+                         vpr[[rl + 1]], fitted_vpr[[rl + 1]],
+                         fitted_vpr_std[[rl + 1]],
+                         family, filter_number, nlevels,
+                         n1, signal_amplitude, amplitude_percentage,
+                         wavelet_amplitudes[[rl + 1]])
+      x = putD(x, level = rl, boundary = TRUE,
+               bayesRule(accessD(x, rl, boundary = TRUE), 
+                         priors))
+    }
+  }
+  x
+} 
