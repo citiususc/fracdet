@@ -7,19 +7,19 @@
 
 using namespace Rcpp;
 
-// qawf_integral
-Rcpp::List qawf_integral(double alpha, double lower, double upper, double abs_tol, double rel_tol, unsigned int size);
-RcppExport SEXP fracdet_qawf_integral(SEXP alphaSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP abs_tolSEXP, SEXP rel_tolSEXP, SEXP sizeSEXP) {
+// bayesRuleCpp
+NumericVector bayesRuleCpp(NumericVector input, List priors, int key, double abs_tol, double rel_tol, unsigned int size);
+RcppExport SEXP fracdet_bayesRuleCpp(SEXP inputSEXP, SEXP priorsSEXP, SEXP keySEXP, SEXP abs_tolSEXP, SEXP rel_tolSEXP, SEXP sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type lower(lowerSEXP);
-    Rcpp::traits::input_parameter< double >::type upper(upperSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< List >::type priors(priorsSEXP);
+    Rcpp::traits::input_parameter< int >::type key(keySEXP);
     Rcpp::traits::input_parameter< double >::type abs_tol(abs_tolSEXP);
     Rcpp::traits::input_parameter< double >::type rel_tol(rel_tolSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type size(sizeSEXP);
-    __result = Rcpp::wrap(qawf_integral(alpha, lower, upper, abs_tol, rel_tol, size));
+    __result = Rcpp::wrap(bayesRuleCpp(input, priors, key, abs_tol, rel_tol, size));
     return __result;
 END_RCPP
 }
