@@ -113,8 +113,16 @@ getPriors = function(wavelet_details, vpr,
 
 
 # Bayes rule --------------------------------------------------------------
+checkPriors = function(priors) {
+  required_priors = c("alpha", "beta", "tau", "mu", "p", "n")
+  if (!all(required_priors %in% names(priors))) {
+    stop("Incorrect priors")
+  }
+}
 
-
-bayesRule = function(input, priors){
-  input
+#' @export
+bayesRule = function(input, priors, key = 6L, rel_tol = 1e-7, size = 1e5L){
+  checkPriors(priors)
+  .Call('fracdet_bayesRuleCpp', PACKAGE = 'fracdet',
+        input, priors, key, 0.0, rel_tol, size)
 }
