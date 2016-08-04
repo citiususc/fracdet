@@ -47,8 +47,8 @@ nls_adapter = function(...){
   # Rename it and eliminate nls_data
   args$data = args$nls_data
   args$nls_data = NULL
-  # if weigths is NULL, remove it from the list
-  if (is.null(args$weigths)) {
+  # if weights is NULL, remove it from the list
+  if (is.null(args$weights)) {
     args$weights = NULL
   }
   # call nls
@@ -59,19 +59,77 @@ nls_adapter = function(...){
 # estimatefBmPars ---------------------------------------------------------
 
 
+#' Estimate fractional Brownian motion parameters from its wavelet coefficients' variances
+#'
+#' \code{estimatefBmPars} determines the fractional Brownian motion (fBm)
+#' parameters by fitting the theoretical wavelet coefficients' variances
+#' to given experimental variances. The estimation procedure is thus based
+#' on nonlinear least-squares estimates and makes use of the \code{nls} function
+#' \code{\link[stats]{nls}}.
+#'
+#' @param x A \code{WaveletVar} object.
+#' @param use_resolution_levels A numeric vector specifying which resolution levels
+#' should be used in the fit.
+#' @param start A named list or named numeric vector of starting estimates. The
+#' names of the list should be \code{H} and \code{sigma2}.
+#' @param lower,upper Vectors of lower and upper bounds. Note that the \code{H}
+#' parameter should fulfil \eqn{0 < H < 1}, whereas that \code{sigma2} should be
+#' \eqn{sigma2 > 0} If unspecified, proper bounds are computed.
+#' @param use_weights Logical value indicating wheter the objective function is
+#' weighted least squares or not. If \code{use_weights} is \code{TRUE}, proper
+#' weights are automatically computed.
+#' @param algorithm Character string specifying the algorithm to use (see
+#' \code{\link[stats]{nls}}. Note that bounds can only be used with the "port"
+#' algorithm (default choice).
+#' @param ... Additional \code{nls} arguments (see \code{\link[stats]{nls}}).
+#' @return A \code{nls} object representing the fitted model. See
+#' \code{\link[stats]{nls}} for further details.
+#' @examples
+#' set.seed(10)
+#' fbm = fbmSim(n = 2 ^ 13, H = 0.4)
+#' vpr = WaveletVar(wd(fbm, bc = "symmetric"))
+#' plot(vpr)
+#' # Estimate the fBm parameters using the largest resolution levels
+#' # since the estimates of their variances are better
+#' model = estimatefBmPars(vpr, use_resolution_levels = 5:12)
+#' # The nls-fit is performed in semilog-space. Thus, a transformation
+#' # of the predicted values is required
+#' points(resolutionLevels(vpr),
+#'        2 ^ predict(model, newdata = data.frame(x = 0:12)),
+#'        col = 2,
+#'        pch = 2)
+#' # Since the estimates of the largest resolution levels are better we may
+#' # use a weigthed regression scheme
+#' wmodel = estimatefBmPars(vpr, use_resolution_levels = 5:12,
+#'                          use_weights = TRUE)
+#' points(resolutionLevels(vpr),
+#'        2 ^ predict(wmodel, newdata = data.frame(x = 0:12)),
+#'        col = 3,
+#'        pch = 3)
+#' legend("topright", pch = 1:3, col = 1:3, bty = "n",
+#'        legend = c("Original data", "nls model", "weighted-nls model"))
+#' @section Warning:
+#' Do not use nls on artificial "zero-residual" data. See
+#' \code{\link[stats]{nls}} for further details.
+#' @seealso \code{\link{WaveletVar}}, \code{\link{theoreticalWaveletVar}}
 #' @export
-estimatefBmPars = function(x, ...) {
+estimatefBmPars = function(x, use_resolution_levels,
+                           start = NULL, lower = NULL, upper = NULL,
+                           use_weights = FALSE, algorithm = "port",
+                           ...) {
   UseMethod("estimatefBmPars", x)
 }
 
 
 
 #' @export
-estimatefBmPars.WaveletVar <- function(vpr,
+estimatefBmPars.WaveletVar <- function(x,
                                        use_resolution_levels,
                                        start = NULL, lower = NULL, upper = NULL,
                                        use_weights = FALSE, algorithm = "port",
                                        ...){
+  # rename for clarity
+  vpr = x
   # change resolution levels to vector indexes
   use_indx = use_resolution_levels + 1
   # get wavelet information
@@ -101,14 +159,14 @@ estimatefBmPars.WaveletVar <- function(vpr,
   }
 
   if (use_weights) {
-    weigths = 2 ^ (nls_data$x) - 1
+    weights = 2 ^ (nls_data$x) - 1
   } else {
-    weigths = NULL
+    weights = NULL
   }
 
   fit = nls_adapter(formula = y ~ log2(functionToFit(x, H, sigma2)),
                     nls_data = nls_data,
-                    weights = weigths,
+                    weights = weights,
                     algorithm = algorithm,
                     lower = lower,
                     upper = upper,

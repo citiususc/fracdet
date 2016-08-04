@@ -1,12 +1,16 @@
 
 # constructors of the WaveletVar class  -----------------------------------------------
 
-#' Build a WaveletVar object from a numeric vector (private function)
-#' @param family Specifies the family of wavelets used in the computation of the
-#' wavelet transform. See \code{\link[wavethresh]{wd}}.
-#' @param filter_number An integer identifying the concrete filter used within the
-#' \code{family} of wavelets selected. \code{filter_number} is related with the
-#' smoothness of the wavelet. See \code{\link[wavethresh]{wd}}.
+# Build a WaveletVar object from a numeric vector (private function)
+#
+# @param vpr Numeric vector containing the  wavelet coefficients' variances on
+# each wavelet resolution level (resolution levels are assumed to be arranged
+# in ascending order).
+# @param family Specifies the family of wavelets used in the computation of the
+# wavelet transform. See \code{\link[wavethresh]{wd}}.
+# @param filter_number An integer identifying the concrete filter used within the
+# \code{family} of wavelets selected. \code{filter_number} is related with the
+# smoothness of the wavelet. See \code{\link[wavethresh]{wd}}.
 buildWaveletVar = function(vpr, family, filter_number) {
   names(vpr) = 0:(length(vpr) - 1)
   class(vpr) = c("WaveletVar", class(vpr))
@@ -15,17 +19,16 @@ buildWaveletVar = function(vpr, family, filter_number) {
   vpr
 }
 
-#' Wavelet coefficients' variance depending on the resolution level
+#' Wavelet coefficients' variances.
 #'
-#' @param x Either a numeric vector or a \code{wd} object (see
-#' \code{\link[wavethresh]{wd}}). If \code{x} is a numeric vector, it should
-#' contain the wavelet coefficients' variance on each wavelet resolution level
-#' (resolution levels are assumed to be arranged in ascending order). If
-#' \code{x} is a \code{wd} object, the wavelet coefficients' variance is computed
-#' before constructing the \code{WaveletVar} object.
-#' @param ... Additional arguments.
+#' \code{WaveletVar} computes the wavelet coefficients' variances of an object
+#' representing a wavelet transform in each of its resolution levels.
+#'
+#' @param x A \code{wd} object (see \code{\link[wavethresh]{wd}}). The wavelet
+#' coefficients' variances are computed in each of the resolution levels
+#' of \code{wd}.
 #' @return An S3 \code{WaveletVar} object that stores the
-#' Wavelet coefficients' variance depending on the resolution level.
+#' Wavelet coefficients' variances depending on the resolution level.
 #' @export
 #' @exportClass Fracdet
 #' @examples
@@ -40,8 +43,10 @@ buildWaveletVar = function(vpr, family, filter_number) {
 #'                                  filter_number = wtInfo(vpr)[["filter_number"]],
 #'                                  nlevels = length(vpr))
 #' points(theo_vpr, col = "red")
+#' @seealso \code{\link{wtInfo}}, \code{\link{resolutionLevels}},
+#' \code{\link{theoreticalWaveletVar}}, \code{\link{Fracdet}},
+#' \code{\link{estimatefBmPars}}
 #' @import wavethresh
-#' @rdname WaveletVar
 #' @export
 WaveletVar = function(x){
   kMIN_POINTS = 5
@@ -86,9 +91,10 @@ WaveletVar = function(x){
 
 # Accesing attributes of the WaveletVar class ------------------------------------
 
-#' @section Methods:
-#' \code{resolutionLevels}: Get the resolution levels.
-#' @rdname WaveletVar
+#' Get the resolution levels at which the wavelet coefficients' variances was
+#' computed.
+#' @param x A \code{WaveletVar} object.
+#' @return A numerical vector of the same length as \code{WaveletVar}.
 #' @export
 resolutionLevels = function(x){
   UseMethod("resolutionLevels")
@@ -99,11 +105,11 @@ resolutionLevels.WaveletVar = function(x){
   0:(length(x) - 1)
 }
 
-#' @section Methods:
-#' \code{wtInfo}: Get the family and the filter-number used in the
-#'  wavelet transform asociated with the object. Returns a list with the proper
-#'  wavelet information.
-#' @rdname WaveletVar
+#' Get the family and the filter-number used in the wavelet transform asociated
+#' with the \code{WaveletVar} object.
+#' @inheritParams resolutionLevels
+#' @return An R list containing the family (\code{family} field) and the
+#' filter-number (\code{filter_number}).
 #' @export
 wtInfo = function(x){
   UseMethod("wtInfo")
@@ -115,8 +121,6 @@ wtInfo.WaveletVar = function(x){
 }
 
 # Plotting functions for WaveletVar class ----------------------------------------
-#' @section Methods:
-#' \code{plot}, \code{points} and \code{lines}: generic plotting utilities.
 #' @export
 plot.WaveletVar = function(x, main = "Variance per Resolution Level",
                            xlab = "Wavelet Resolution Level",
@@ -152,6 +156,36 @@ getWaveletFilters = function(family, filter_number){
 }
 
 
+#' Wavelet coefficients' variances of a fractional Brownian motion
+#'
+#' \code{theoreticalWaveletVar} calculates the theoretical wavelet coefficients'
+#'  variance of a fractional Brownian motion (fBm) with known parameters.
+#'
+#' @param H The Hurst exponent of the fBm.
+#' @param sigma2  Variance of the fractional Gaussian noise that results after
+#' differentiating the fBm.
+#' @param family Specifies the family of wavelets used in the computation of the
+#' wavelet transform. See \code{\link[wavethresh]{wd}}.
+#' @param filter_number An integer identifying the concrete filter used within the
+#' \code{family} of wavelets selected. \code{filter_number} is related with the
+#' smoothness of the wavelet. See \code{\link[wavethresh]{wd}}.
+#' @param nlevels Number of resolution levels to compute. Thus, the resulting
+#' wavelet coefficients' variances are the expected ones from a fBm of length
+#' \eqn{2 ^ n}.
+#' @return A \code{WaveletVar} object with the theoretical wavelet variance.
+#' @examples
+#' use_H = 0.3
+#' fbm = fbmSim(n = 2 ^ 10, H = use_H)
+#' w_fbm = wd(fbm, bc = "symmetric")
+#' vpr = WaveletVar(w_fbm)
+#' plot(vpr)
+#' # the theoreticalWaveletVar also returns a 'WaveletVar' object:
+#' theo_vpr = theoreticalWaveletVar(H = use_H, sigma2 = 1,
+#'                                  family = wtInfo(vpr)[["family"]],
+#'                                  filter_number = wtInfo(vpr)[["filter_number"]],
+#'                                  nlevels = length(vpr))
+#' points(theo_vpr, col = "red")
+#' @seealso \code{\link{WaveletVar}}, \code{\link{estimatefBmPars}}
 #' @export
 #' @useDynLib fracdet
 theoreticalWaveletVar = function(H, sigma2, family, filter_number, nlevels) {

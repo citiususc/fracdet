@@ -2,54 +2,22 @@
 % Please edit documentation in R/WaveletVar.R
 \name{WaveletVar}
 \alias{WaveletVar}
-\alias{WaveletVar.numeric}
-\alias{WaveletVar.wd}
-\alias{resolutionLevels}
-\alias{wtInfo}
-\title{Wavelet coefficients' variance depending on the resolution level}
+\title{Wavelet coefficients' variances.}
 \usage{
-WaveletVar(x, ...)
-
-\method{WaveletVar}{numeric}(x, family, filter_number)
-
-\method{WaveletVar}{wd}(x)
-
-resolutionLevels(x)
-
-wtInfo(x)
+WaveletVar(x)
 }
 \arguments{
-\item{x}{Either a numeric vector or a \code{wd} object (see
-\code{\link[wavethresh]{wd}}). If \code{x} is a numeric vector, it should
-contain the wavelet coefficients' variance on each wavelet resolution level
-(resolution levels are assumed to be arranged in ascending order). If
-\code{x} is a \code{wd} object, the wavelet coefficients' variance is computed
-before constructing the \code{WaveletVar} object.}
-
-\item{...}{Additional arguments.}
-
-\item{family}{Specifies the family of wavelets used in the computation of the
-wavelet transform. See \code{\link[wavethresh]{wd}}.}
-
-\item{filter_number}{An integer identifying the concrete filter used within the
-\code{family} of wavelets selected. \code{filter_number} is related with the
-smoothness of the wavelet. See \code{\link[wavethresh]{wd}}.}
+\item{x}{A \code{wd} object (see \code{\link[wavethresh]{wd}}). The wavelet
+coefficients' variances are computed in each of the resolution levels
+of \code{wd}.}
 }
 \value{
 An S3 \code{WaveletVar} object that stores the
-Wavelet coefficients' variance depending on the resolution level.
+Wavelet coefficients' variances depending on the resolution level.
 }
 \description{
-Wavelet coefficients' variance depending on the resolution level
-}
-\section{Methods}{
-
-\code{resolutionLevels}: Get the resolution levels.
-
-
-\code{wtInfo}: Get the family and the filter-number used in the
- wavelet transform asociated with the object. Returns a list with the proper
- wavelet information.
+\code{WaveletVar} computes the wavelet coefficients' variances of an object
+representing a wavelet transform in each of its resolution levels.
 }
 \examples{
 use_H = 0.3
@@ -63,5 +31,10 @@ theo_vpr = theoreticalWaveletVar(H = use_H, sigma2 = 1,
                                  filter_number = wtInfo(vpr)[["filter_number"]],
                                  nlevels = length(vpr))
 points(theo_vpr, col = "red")
+}
+\seealso{
+\code{\link{wtInfo}}, \code{\link{resolutionLevels}},
+\code{\link{theoreticalWaveletVar}}, \code{\link{Fracdet}},
+\code{\link{estimatefBmPars}}
 }
 
