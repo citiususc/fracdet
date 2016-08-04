@@ -1,71 +1,64 @@
 
 # constructors of the WaveletVar class  -----------------------------------------------
 
-#' @export
-#' @import wavethresh
-WaveletVar = function(x, ...){
-  UseMethod("WaveletVar")
-}
 
 
-#' Constructor of the WaveletVar class from a vector
-#' @export
-WaveletVar.default = function(vpr, family, filter_number){
+buildWaveletVar = function(vpr, family, filter_number){
   names(vpr) = 0:(length(vpr) - 1)
   class(vpr) = c("WaveletVar", class(vpr))
   attr(vpr, "wt_info") = list(family = family,
-                                     filter_number = filter_number)
+                              filter_number = filter_number)
   vpr
 }
 
 #' constructor of the WaveletVar class from a wavethresh::wd object
 #' @export
-WaveletVar.wd = function(wx){
+WaveletVar = function(x){
   kMIN_POINTS = 5
-  if (!inherits(wx, "wd")) {
-    stop("wx is not an \"wd\" object")
+  if (!inherits(x, "wd")) {
+    stop("x is not an \"wd\" object")
   }
-  wx_nlevels = wavethresh::nlevelsWT(wx)
-  vpr = rep(0.0, wx_nlevels)
+  x_nlevels = wavethresh::nlevelsWT(x)
+  vpr = rep(0.0, x_nlevels)
 
   filter_len = length(
     wavethresh::filter.select(
-      filter.number = wx$filter$filter.number,
-      family = wx$filter$family
+      filter.number = x$filter$filter.number,
+      family = x$filter$family
     )$H
   )
   # first index unaffected by the circularity assumption of the wavelet transform
-  unaffected_index =  ceiling( (filter_len - 2) * (1 - 1 / 2 ^ (wx_nlevels:1)) )
+  unaffected_index =  ceiling( (filter_len - 2) * (1 - 1 / 2 ^ (x_nlevels:1)) )
 
   # estimate the variance of the resolution level 0 ...
-  vpr[[1]] = wavethresh::accessD(wx, 0) ^ 2
+  vpr[[1]] = wavethresh::accessD(x, 0) ^ 2
   # ... and loop for the remainder levels
-  resolution_levels = 0:(wx_nlevels - 1)
-  for (i in 2:wx_nlevels) {
+  resolution_levels = 0:(x_nlevels - 1)
+  for (i in 2:x_nlevels) {
     available_points = (2 ^ resolution_levels[[i]] - 2 * unaffected_index[[i]])
     if (available_points >  kMIN_POINTS) {
       segment_index = unaffected_index[[i]]:(2 ^ resolution_levels[[i]] -
                                                unaffected_index[[i]])
-      vpr[[i]] = var(wavethresh::accessD(wx,
-                                                resolution_levels[[i]])[segment_index])
+      vpr[[i]] = var(wavethresh::accessD(x,
+                                         resolution_levels[[i]])[segment_index])
 
     }else {
       # not enough points for a variance-estimation free from the circularity
       # assumption: we use all points of the level
-      vpr[[i]] = var(wavethresh::accessD(wx, resolution_levels[[i]]))
+      vpr[[i]] = var(wavethresh::accessD(x, resolution_levels[[i]]))
     }
 
   }
 
-  WaveletVar.default(vpr,
-                     family = wx$filter$family,
-                     filter_number = wx$filter$filter.number)
+  buildWaveletVar(vpr,
+                  family = x$filter$family,
+                  filter_number = x$filter$filter.number)
 }
 
 # Accesing attributes of the WaveletVar class ------------------------------------
 
 #' @export
-resolutionLevels = function(x, ...){
+resolutionLevels = function(x){
   UseMethod("resolutionLevels")
 }
 
@@ -75,7 +68,7 @@ resolutionLevels.WaveletVar = function(x){
 }
 
 #' @export
-wtInfo = function(x, ...){
+wtInfo = function(x){
   UseMethod("wtInfo")
 }
 
@@ -88,8 +81,8 @@ wtInfo.WaveletVar = function(x){
 
 #' @export
 plot.WaveletVar = function(x, main = "Variance per Resolution Level",
-                    xlab = "Wavelet Resolution Level",
-                    ylab = "Variance", log = "y", ...){
+                           xlab = "Wavelet Resolution Level",
+                           ylab = "Variance", log = "y", ...){
   plot(resolutionLevels(x), as.numeric(x), main = main, xlab = xlab, ylab = ylab,
        log = log, ...)
 }
@@ -111,7 +104,7 @@ lines.WaveletVar = function(x, ...){
 
 getWaveletFilters = function(family, filter_number){
   h = wavethresh::filter.select(filter.number = filter_number,
-                                 family = family)$H
+                                family = family)$H
   len = length(h)
   # Definition of g[n]:
   # g[n] = (-1) ^ (1 - n) * h[1 - n]
@@ -126,10 +119,10 @@ getWaveletFilters = function(family, filter_number){
 theoreticalWaveletVar = function(H, sigma2, family, filter_number, nlevels) {
   filters = getWaveletFilters(family = family,
                               filter_number = filter_number)
-  WaveletVar(.Call('fracdet_theoreticalWaveletVarCpp', PACKAGE = 'fracdet',
-                   filters$g, filters$h, H, sigma2, nlevels),
-             family = family,
-             filter_number = filter_number)
+  buildWaveletVar(.Call('fracdet_theoreticalWaveletVarCpp', PACKAGE = 'fracdet',
+                        filters$g, filters$h, H, sigma2, nlevels),
+                  family = family,
+                  filter_number = filter_number)
 }
 
 
