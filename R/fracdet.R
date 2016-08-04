@@ -1,29 +1,20 @@
 # fracdet constructor -----------------------------------------------------
-
-#' @export
-Fracdet = function(x, fbmPars) {
-  UseMethod("Fracdet", fbmPars)
-}
-
-# private function
-FracdetFromFit = function(x, fbmPars) {
+checkFracdetArgs = function(x, fbmPars) {
   if (!inherits(x, "wd")) {
     stop("x is not a \"wd\" object")
   }
-  attr(x, "WaveletVar") = WaveletVar.wd(x)
+  if (!inherits(fbmPars, "lm") && !inherits(fbmPars, "nls")) {
+    stop("fbmPars shoulb be either a \"lm\" or a \"nls\" object")
+  }
+}
+
+#' @export
+Fracdet = function(x, fbmPars) {
+  checkFracdetArgs(x, fbmPars)
+  attr(x, "WaveletVar") = WaveletVar(x)
   attr(x, "fbmPars") = fbmPars
   class(x) = c("Fracdet", class(x))
   x
-}
-
-#' @export
-Fracdet.lm = function(x, fbmPars) {
-  FracdetFromFit(x, fbmPars)
-}
-
-#' @export
-Fracdet.nls = function(x, fbmPars) {
-  FracdetFromFit(x, fbmPars)
 }
 
 # Basic functionality -----------------------------------------------------
@@ -103,7 +94,7 @@ putC.Fracdet = function(x, ...) { putC.wd(as.wd(x), ...) }
 putD.Fracdet = function(x, ...) { putD.wd(as.wd(x), ...) }
 summary.Fracdet = function(x, ...) { summary.wd(as.wd(x), ...) }
 threshold.Fracdet = function(x, ...) { threshold.wd(as.wd(x), ...) }
-WaveletVar.Fracdet = function(x, ...) { WaveletVar.wd(as.wd(x), ...) }
+WaveletVar.Fracdet = function(x, ...) { WaveletVar(as.wd(x), ...) }
 wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 
 
