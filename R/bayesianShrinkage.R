@@ -121,7 +121,6 @@ checkPriors = function(priors) {
   }
 }
 
-#' @export
 bayesRule = function(input, priors, key = 6L, rel_tol = 1e-7, size = 1e5L){
   checkPriors(priors)
   .Call('fracdet_bayesRuleCpp', PACKAGE = 'fracdet',
