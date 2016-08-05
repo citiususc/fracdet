@@ -72,16 +72,25 @@ checkFracdetArgs = function(x, fbmPars) {
 #' # estimate the fBm parameters avoiding levels 11 and 12 (with deterministic
 #' # contributions). Level 12 is also avoid as a precaution
 #' model = estimatefBmPars(vpr, use_resolution_levels = c(5:10, 13))
-#' print(coef(model))
-#' # The nls-fit is performed in semilog-space. Thus, a transformation
-#' # of the predicted values is required
-#' points(resolutionLevels(vpr),
-#'        2 ^ predict(model, newdata = data.frame(x = resolutionLevels(vpr))),
-#'        col = 2,
-#'        pch = 2)
+#'
 #' # Create a Fracdet object...
 #' fd = Fracdet(ws, model)
-#' # ... and estimate the deterministic signal (this may take a while) taking
+#' # ... and check the fbm parameters estimates
+#' coef(fd)
+#' # A plot of the fitted variances may be useful
+#' plot(getWaveletVar(fd))
+#' points(getFittedWaveletVar(fd),
+#'       col = 2,
+#'       pch = 2)
+#' # we could also extract the nls-fit and use the predict function
+#' # The nls-fit is performed in semilog-space. Thus, a transformation
+#' # of the predicted values is required
+#' nls_model = getFbmPars(fd)
+#' points(resolutionLevels(vpr),
+#'        2 ^ predict(nls_model, newdata = data.frame(x = resolutionLevels(vpr))),
+#'        col = 3,
+#'        pch = 3)
+#' # Estimate the deterministic signal (this may take a while) taking
 #' # into account the deviations in level 11, 12. The estimateDetSignal uses
 #' # this information using a Bayesian modelling approach
 #' wx = estimateDetSignal(fd, estimate_from = 11:12)
