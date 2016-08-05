@@ -1,3 +1,8 @@
+# fracdet selective imports -----------------------------------------------
+#' @importFrom graphics lines plot points
+#' @importFrom stats coef lm mad nls predict sd var  vcov
+NULL
+
 # fracdet constructor -----------------------------------------------------
 checkFracdetArgs = function(x, fbmPars) {
   if (!inherits(x, "wd")) {

@@ -4,8 +4,12 @@ Title: models 1/f noise + deterministic oscillations
 Version: 0.0.1
 Author: Constantino Antonio Garcia Martinez
 Maintainer: Constantino A. Garcia <constantinoantonio.garcia@usc.es>
-Description: Model complex systems consisting on 1/f noises and nonlinear
-    deterministic oscillations
+Description: The 'fracdet' package implements a simple, yet realistic,
+  fractal-deterministic model that may be able to capture key features of
+  complex time series. The package also provides functionality that, under the
+  assumptions of this model, is able to characterize the fractal component and
+  to provide an estimation of the deterministic components present in a given
+  time series.
 License: GPL-3
 LazyData: TRUE
 RoxygenNote: 5.0.1

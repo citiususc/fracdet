@@ -190,6 +190,7 @@ getWaveletFilters = function(family, filter_number){
 #' points(theo_vpr, col = "red")
 #' @seealso \code{\link{WaveletVar}}, \code{\link{estimatefBmPars}}
 #' @export
+#' @import Rcpp
 #' @useDynLib fracdet
 theoreticalWaveletVar = function(H, sigma2, family, filter_number, nlevels) {
   filters = getWaveletFilters(family = family,

@@ -14,6 +14,7 @@
 #'  provided in the Coeurjolly article (see references).
 #' @references Jean-Francois, Coeurjolly. "Simulation and Identification of the
 #' Fractional Brownian Motion: A bibliographical and comparative study." (2007).
+#' @import Rcpp
 #' @export
 fbmSim = function(n, H) {
   .Call('fracdet_simulateFbmCpp', PACKAGE = 'fracdet', n, H)
