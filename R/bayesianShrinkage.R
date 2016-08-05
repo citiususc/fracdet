@@ -80,7 +80,8 @@ getPriors = function(wavelet_details, vpr,
                      fitted_vpr, fitted_vpr_std,
                      family, filter_number, nlevels,
                      df_tstudent, signal_amplitude,
-                     amplitude_percentage, wavelet_amplitude){
+                     amplitude_percentage, wavelet_amplitude,
+                     aggr_strategy){
 
   # Compute parameters for the Gamma distribution
   alpha = (fitted_vpr / fitted_vpr_std) ^ 2
@@ -94,7 +95,7 @@ getPriors = function(wavelet_details, vpr,
   noise_level = sqrt(2 * log(ncoeffs) * (fitted_vpr + tau ^ 2))
 
   p = sum(abs(wavelet_details) >= noise_level) / ncoeffs
-  if (p <= 1 / ncoeffs) {
+  if (aggr_strategy || (p <= 1 / ncoeffs)) {
     # use two standard deviations to get a conservative estimation of noise level
     # and thus avoiding estimation p = 0
     conservative_noise_level = 2 * sqrt(fitted_vpr + tau ^ 2)

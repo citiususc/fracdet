@@ -24,10 +24,13 @@ buildWaveletVar = function(vpr, family, filter_number) {
 #' \code{WaveletVar} computes the wavelet coefficients' variances of an object
 #' representing a wavelet transform in each of its resolution levels.
 #'
+#' In addition to the specific methods for the \code{WaveletVar} class, all the
+#' methods for numeric vectors can be used with a \code{WaveletVar} object.
+#'
 #' @param x A \code{wd} object (see \code{\link[wavethresh]{wd}}). The wavelet
 #' coefficients' variances are computed in each of the resolution levels
 #' of \code{wd}.
-#' @return An S3 \code{WaveletVar} object that stores the
+#' @return A S3 \code{WaveletVar} object that stores the
 #' Wavelet coefficients' variances depending on the resolution level.
 #' @export
 #' @exportClass Fracdet
