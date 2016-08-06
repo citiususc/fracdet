@@ -170,6 +170,6 @@ plot(offset + y, xlim = xlim,
      type = "l")
 lines(x, col = 2 , lty = 2, lwd = 2)
 lines(x_est, col = 3, lty = 3, lwd = 2)
-legend("topleft", lty = 1:3, col = 1:3,
+legend("topright", lty = 1:3, col = 1:3,
        legend = c("Y", "x", "x estimate"), bty = "n")
 ```
