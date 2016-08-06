@@ -16,4 +16,7 @@ RoxygenNote: 5.0.1
 Depends: wavethresh, Rcpp
 Imports: FGN, MASS
 LinkingTo: RcppArmadillo, RcppGSL, Rcpp
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

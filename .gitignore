@@ -7,3 +7,5 @@ Rplots.pdf
 *.o
 *.so
 R/RcppExports.R
+inst/doc
+vignettes/quickstart_cache/

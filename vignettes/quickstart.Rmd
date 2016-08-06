@@ -1,0 +1,175 @@
+---
+title: "fracdet quickstart"
+author: "Constantino Antonio García Martínez"
+date: "`r Sys.Date()`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{fracdet_quickstart}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r options,echo=FALSE}
+# colorblind friendly palette
+palette(c("#000000", "#E69F00", "#56B4E9", "#009E73",
+          "#F0E442", "#0072B2", "#D55E00", "#CC79A7"))
+library('knitr')
+knitr::opts_chunk$set(
+  fig.width = 7, fig.height = 4.7,
+  fig.align = "center", fig.show = 'hold'
+  )
+```
+
+## Introduction
+__fracdet__ is an R package implementing a simple, yet realistic,
+fractal-deterministic model that may be able to capture key features of 
+complex systems with long  term correlations. We assume that the observed 
+signal $Y$ is the result of the superposition of a stochastic series $B$ and 
+some band-limited deterministic signal $x$:
+
+$$Y[n] = x[n] + B[n].$$
+ 
+__fracdet__ also provides a method that, under the assumptions of this model,
+permits the characterization of the fractal component and the  estimation of the
+deterministic components of the system.
+
+All the theoretical background is detailed in the paper:
+
+> García, C.A., Otero, A., Félix, P., Presedo, J. & Márquez D.G., (2016). Simultaneous estimation of deterministic and fractal components in non-stationary time series (in review).
+
+## The _WaveletVar_ class
+According to a convenient modelling approach, long-memory signals can be 
+studied as realizations of one of two classes of processes: fractional Gaussian noise (fGn) or fractional Brownian motion (fBm). Since the increments of a fBm signal yield a stationary fGn signal, we may focus on the fBm model. Thus, we
+assume that $B$ can be approximated by a fBm.
+
+Two important features should be handled when analysing fBm signals: 
+non-stationarity, which demands for a time-dependent analysis; and 
+self-similarity, which demands for a scale-dependent analysis. Thus, wavelet
+analysis provides a proper framework for studying fBm signals. Furthermore, it 
+is possible to estimate the fBm parameters by studying how the wavelet
+coefficients' variance depend on the resolution level. ___fracdet___ provides 
+the `WaveletVar` class for studying the wavelet coefficients' variances.
+
+```{r waveletVar, message=FALSE, warning = FALSE}
+library('fracdet')
+# parameters for the example:
+set.seed(3)
+nlevels = 14
+n = 2 ^ nlevels
+H = 0.3
+# Simulate a fbm and compute its wavelet transform.
+b = fbmSim(n = n, H = H)
+wb = wd(b, bc = "symmetric")
+# Compute the wavelet coefficients variances and plot them.
+vpr = WaveletVar(wb)
+plot(vpr)
+```
+
+## fBm parameter estimation
+The shape and slope of the wavelet variances  depends on the Hurst exponent of
+the fBm. To estimate it, __fracdet__ provides the `estimatefBm` function, which
+is based on the `nls` R function:
+
+```{r parameterEstimates}
+model = estimatefBmPars(vpr,
+                        use_resolution_levels = c(5:13))
+# 'model' is a nls object and thus,
+# we can obtain the parameter estimations with:
+print(coef(model))
+```
+
+## The _Fracdet_ class
+What happens when our observed signal $Y$ may be approximated as 
+$Y[n] = x[n] + B[n]$?
+
+```{r example}
+# simulate a simple fbm + sinusal signal.
+x = 1.25 * cospi(2 * 1:n / 10)
+y = fbmSim(n = n, H = H) + x
+wy = wd(y, bc = "symmetric")
+# Compute the wavelet coefficients variances and plot them.
+vpr = WaveletVar(wy)
+plot(vpr)
+```
+
+Can you see the deviations in the wavelet coefficients' variance on level 11?
+This is due to the deterministic components. However, if the deterministic 
+component $x$ is a band-limited signal we can still obtain good estimates
+of the fBm parameters. 
+
+```{r parameterEstimatesII}
+# Ignore resolution levels 11 and 12 to obtain the 
+# fBm parameters estimates.
+model = estimatefBmPars(vpr,
+                        use_resolution_levels = c(5:10,13))
+
+```
+
+The `Fracdet` class can now be used to ease the procedure of working with a signal that may fulfil the assumptions of our fractal-deterministic model. The 
+parameters required for the `Fracdet` constructor are the wavelet
+transform of the observed signal,  and the fitted-model object used for
+estimating the fBm parameters. 
+
+
+```{r Fracdet}
+# Create a Fracdet object...
+fd = Fracdet(wy, model)
+# ... and check the fbm parameters estimates.
+print(coef(fd))
+# A plot of the fitted variances may also be useful.
+plot(getWaveletVar(fd))
+points(getFittedWaveletVar(fd),
+       col = 2,
+       pch = 2)
+# we could also extract the nls-fit and use the predict function.
+# The nls-fit is performed in semilog-space. Thus, a transformation
+# of the predicted values is required.
+nls_model = getFbmPars(fd)
+points(resolutionLevels(vpr),
+       2 ^ predict(nls_model, newdata = data.frame(x = resolutionLevels(vpr))),
+       col = 3,
+       pch = 3)
+```
+
+By performing the nls-fit we have not only characterized the fBm process, but we
+have also gained information about the deterministic contributions in each 
+wavelet resolution level. We shall use this information to obtain an estimation 
+of the deterministic signal.
+
+## Estimate the deterministic signal
+Using all the available information about the observed signal, a bayesian model 
+of the distribution of the deterministic and stochastic wavelet coefficients is
+built. The available information consist on:
+
+  * The estimates of the fBm parameters (which completely characterize the
+  statistical properties of the fBm signal).
+  * The well-known statistical properties of the fBm signals in wavelet domain.
+  * The deviations from the theoretical wavelet coefficients' variance permit the
+  estimation of the energy distribution across the resolution levels of the
+  deterministic signal.
+
+The wavelet transform of the deterministic signal is then estimated by calculating
+the decision rule that minimizes the posterior expected value of a squared loss
+function. The `estimateDetSignal` implements all these actions and returns the
+estimate of the wavelet transform of the deterministic signal:
+
+```{r signalEstimation, cache=TRUE}
+# Estimate the deterministic signal (this may take a while) taking
+# into account the deviations in level 11, 12. 
+wx = estimateDetSignal(fd, estimate_from = 11:12)
+x_est = wr(wx)
+# compare the original signal and the estimation
+xlim = c(300, 450)
+offset = 2
+indx = xlim[[1]]:xlim[[2]]
+ylim = range(c(offset + y[indx],
+               x[indx],
+               x_est[indx]))
+plot(offset + y, xlim = xlim,
+     ylim = ylim,
+     type = "l")
+lines(x, col = 2 , lty = 2, lwd = 2)
+lines(x_est, col = 3, lty = 3, lwd = 2)
+legend("topleft", lty = 1:3, col = 1:3,
+       legend = c("Y", "x", "x estimate"), bty = "n")
+```
