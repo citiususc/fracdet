@@ -19,8 +19,8 @@ checkFracdetArgs = function(x, fbmPars) {
 #' be modelled  by a simple fractal-deterministic model with long-memory
 #' properties. The model consists on a  linear superposition of a fractional
 #' brownian motion (fBm) \eqn{B} and a deterministic band-limited signal
-#' \eqn{x}. That is, the observed signal is \eqn{S = x + B}. The \code{Fracdet}
-#' receives as parameters the wavelet transform of \eqn{S} and an R fitted model
+#' \eqn{x}. That is, the observed signal is \eqn{Y = x + B}. The \code{Fracdet}
+#' receives as parameters the wavelet transform of \eqn{Y} and an R fitted model
 #' object (\code{nls} or \code{lm}) containing the estimation of the parameters
 #' characterizing the fBm (The Hurst exponent \eqn{H} and the "dispersion"
 #' parameter \eqn{\sigma ^ 2}{sigma ^ 2}). The main method of the \code{Fracdet} class
@@ -31,17 +31,17 @@ checkFracdetArgs = function(x, fbmPars) {
 #' \code{wd} methods can be used with a \code{Fracdet} object.
 #'
 #' @param x A \code{wd} object representing the wavelet transform of the observed
-#' signal \eqn{S}.
+#' signal \eqn{Y}.
 #' @param fbmPars Either a \code{nls} or a \code{lm} object (see
 #' \code{\link[stats]{nls}} and \code{\link[stats]{nls}}) providing estimates
 #' of the parameters characterizing the fBm part of the model (The Hurst
 #' exponent \eqn{H} and the "dispersion" parameter \eqn{\sigma ^ 2}{sigma ^ 2}).
 #' Thus, the names of the fitted variables are assumed to be \code{H} and
 #' \code{sigma2}.
-#' @return A S3 \code{Fracdet} object that represents the observed \eqn{S} signal
+#' @return A S3 \code{Fracdet} object that represents the observed \eqn{Y} signal
 #' in the wavelet domain. The \code{Fracdet} object will also contain the
 #' estimates of the fBm parameters.
-#' @note When computing the wavelet transform of the \eqn{s} signal through the
+#' @note When computing the wavelet transform of the \eqn{Y} signal through the
 #' \code{wd} method (see \code{\link[wavethresh]{wd}}) we recommend using the
 #' "symmetric" boundary handling method (\code{bc == "symmetric"}) if
 #' \eqn{H > 0.5}.
@@ -56,16 +56,16 @@ checkFracdetArgs = function(x, fbmPars) {
 #' H = 0.3
 #' # simulate a simple fbm + sinusal signal
 #' x = 1.25 * cospi(2 * 1:n / 10)
-#' s = fbmSim(n = n, H = H) + x
-#' plot(s, xlim = xlim,
-#'      ylim = range(s[xlim[[1]]:xlim[[2]]]),
+#' y = fbmSim(n = n, H = H) + x
+#' plot(y, xlim = xlim,
+#'      ylim = range(y[xlim[[1]]:xlim[[2]]]),
 #'      type = "l")
 #' lines(x, lty = 2, col = 2)
 #' legend("topright", lty = 1:2, col = 1:2,
-#'        legend = c("S", "x"), bty = "n")
+#'        legend = c("Y", "x"), bty = "n")
 #' # compute the wavelet transform and the wavelet coefficients' variances
-#' ws = wd(s, bc = "symmetric")
-#' vpr = WaveletVar(ws)
+#' wy = wd(y, bc = "symmetric")
+#' vpr = WaveletVar(wy)
 #' # do you note the increase in variance in level 11?
 #' plot(vpr, xlim = c(4, nlevels - 1),
 #'      ylim = range(vpr[5:nlevels]))
@@ -74,7 +74,7 @@ checkFracdetArgs = function(x, fbmPars) {
 #' model = estimatefBmPars(vpr, use_resolution_levels = c(5:10, 13))
 #'
 #' # Create a Fracdet object...
-#' fd = Fracdet(ws, model)
+#' fd = Fracdet(wy, model)
 #' # ... and check the fbm parameters estimates
 #' coef(fd)
 #' # A plot of the fitted variances may be useful
@@ -97,17 +97,17 @@ checkFracdetArgs = function(x, fbmPars) {
 #' x_est = wr(wx)
 #' # compare the original signal and the estimation
 #' old_par = par(mfrow = c(2,1))
-#' plot(s, xlim = xlim,
-#'      ylim = range(s[xlim[[1]]:xlim[[2]]]),
+#' plot(y, xlim = xlim,
+#'      ylim = range(y[xlim[[1]]:xlim[[2]]]),
 #'      type = "l")
 #' lines(x, lty = 2, col = 2)
 #' legend("topright", lty = 1:2, col = 1:2,
-#'        legend = c("S", "x"), bty = "n")
+#'        legend = c("Y", "x"), bty = "n")
 #' plot(x, type = "l", xlim = xlim,
 #'      ylim = range(x) * c(1, 2))
 #' lines(x_est, col = 2, lty = 2)
 #' legend("topright", lty = 1:2, col = 1:2,
-#'        legend = c("x", "x-estimate"), bty = "n")
+#'        legend = c("x", "x estimate"), bty = "n")
 #' par(old_par)
 #' }
 #' @seealso \code{\link{WaveletVar}}, \code{\link{getWaveletVar}},
@@ -250,7 +250,7 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' \code{estimateDetSignal} estimates the deterministic signal based on a
 #' fractal-deterministic model that consists on a  linear superposition of a
 #' fractional brownian motion (fBm) \eqn{B} and a deterministic band-limited
-#' signal \eqn{x} (\eqn{S = x + B}). The model is represented (in wavelet
+#' signal \eqn{x} (\eqn{Y = x + B}). The model is represented (in wavelet
 #' domain) through a \code{Fracdet} object which also contains estimates of the
 #' fBm parameters (see \code{\link{Fracdet}}). To obtain the estimate of the
 #' deterministic component, all the knowledge we may have
@@ -262,7 +262,7 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' \item The well-known statistical properties of the fBm signals in wavelet
 #' domain.
 #' \item The deviations from the theoretical wavelet coefficients' variance
-#' (as a function of the resolution level) allow the estimation of the energy
+#' (as a function of the resolution level) permit the estimation of the energy
 #' distribution accross the resolution levels of the deterministic signal.
 #' }
 #' Using all this information, a bayesian model of the distribution
@@ -314,10 +314,10 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' H = 0.3
 #' # simulate a simple fbm + sinusal signal
 #' x = 1.25 * cospi(2 * 1:n / 10)
-#' s = fbmSim(n = n, H = H) + x
+#' y = fbmSim(n = n, H = H) + x
 #' # compute the wavelet transform and the wavelet coefficients' variances
-#' ws = wd(s, bc = "symmetric")
-#' vpr = WaveletVar(ws)
+#' wy = wd(y, bc = "symmetric")
+#' vpr = WaveletVar(wy)
 #' # do you note the increase in variance in level 11?
 #' plot(vpr, xlim = c(4, nlevels - 1),
 #'      ylim = range(vpr[5:nlevels]))
@@ -325,7 +325,7 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' # contributions). Level 12 is also avoid as a precaution
 #' model = estimatefBmPars(vpr, use_resolution_levels = c(5:10, 13))
 #' # Create a Fracdet object...
-#' fd = Fracdet(ws, model)
+#' fd = Fracdet(wy, model)
 #' # ... and check the fit
 #' print(coef(fd))
 #' # plot the experimental and the fitted wavelet's variances
@@ -340,17 +340,17 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' x_est = wr(wx)
 #' # compare the original signal and the estimation
 #' old_par = par(mfrow = c(2,1))
-#' plot(s, xlim = xlim,
-#'      ylim = range(s[xlim[[1]]:xlim[[2]]]),
+#' plot(y, xlim = xlim,
+#'      ylim = range(y[xlim[[1]]:xlim[[2]]]),
 #'      type = "l")
 #' lines(x, lty = 2, col = 2)
 #' legend("topright", lty = 1:2, col = 1:2,
-#'        legend = c("S", "x"), bty = "n")
+#'        legend = c("Y", "x"), bty = "n")
 #' plot(x, type = "l", xlim = xlim,
 #'      ylim = range(x) * c(1, 2))
 #' lines(x_est, col = 2, lty = 2)
 #' legend("topright", lty = 1:2, col = 1:2,
-#'        legend = c("x", "x-estimate"), bty = "n")
+#'        legend = c("x", "x estimate"), bty = "n")
 #' par(old_par)
 #' }
 #' @seealso \code{\link[wavethresh]{wd}}, \code{\link[wavethresh]{wr}},
