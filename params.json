@@ -1,0 +1,6 @@
+{
+  "name": "Fracdet",
+  "tagline": "An R package for the simultaneous estimation of deterministic and fractal components in non-stationary time series",
+  "body": "# fracdet: estimation of deterministic and fractal components in time series\r\n\r\n## What's `fracdet`?\r\n`fracdet` is an R package implementing a simple, yet realistic, fractal-deterministic model\r\nthat may be able to capture key features of complex time series. The package also provides \r\nfunctionality that, under the assumptions of this model, is able to characterize the fractal\r\ncomponent and to provide an estimation of the deterministic components present in a given time \r\nseries. All the theoretical background is detailed in the paper:\r\n\r\n> García, C.A., Otero, A., Félix, P., Presedo, J. & Márquez D.G., (2016). **Simultaneous estimation of deterministic and fractal\r\ncomponents in non-stationary time series** __(in review)__.\r\n\r\n## Installation\r\n`fracdet` is not currently available on [CRAN](http://cran.r-project.org/), but it may be installed directly from github using [devtools](https://github.com/hadley/devtools).\r\n\r\n```\r\nlibrary(devtools)\r\ninstall_github(\"citiususc/fracdet\")\r\n```\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
