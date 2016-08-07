@@ -2,12 +2,12 @@
 % Please edit documentation in R/fracdet.R
 \name{as.wd}
 \alias{as.wd}
-\alias{as.wd.Fracdet}
+\alias{as.wd.fracdet}
 \title{Coerce to a wd object}
 \usage{
 as.wd(x)
 
-\method{as.wd}{Fracdet}(x)
+\method{as.wd}{fracdet}(x)
 }
 \arguments{
 \item{x}{Any R object.}

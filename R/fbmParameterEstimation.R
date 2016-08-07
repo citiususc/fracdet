@@ -40,10 +40,10 @@ getNlsUpper = function(vpr, family, filter_number, initial_H){
 # nls adapter -------------------------------------------------------------
 
 
-nls_adapter = function(...){
+nlsAdapter = function(...){
   args = list(...)
   # the data for the regression is passed as nls_data to avoid collisions just in
-  # case the user provides data as part of ... in the estimatefBmPars function.
+  # case the user provides data as part of ... in the estimateFbmPars function.
   # Rename it and eliminate nls_data
   args$data = args$nls_data
   args$nls_data = NULL
@@ -56,18 +56,18 @@ nls_adapter = function(...){
 }
 
 
-# estimatefBmPars ---------------------------------------------------------
+# estimateFbmPars ---------------------------------------------------------
 
 
 #' Estimate fractional Brownian motion parameters from its wavelet coefficients' variances
 #'
-#' \code{estimatefBmPars} determines the fractional Brownian motion (fBm)
+#' \code{estimateFbmPars} determines the fractional Brownian motion (fBm)
 #' parameters by fitting the theoretical wavelet coefficients' variances
 #' to given experimental variances. The estimation procedure is thus based
 #' on nonlinear least-squares estimates and makes use of the \code{nls} function
 #' \code{\link[stats]{nls}}.
 #'
-#' @param x A \code{WaveletVar} object.
+#' @param x A \code{waveletVar} object.
 #' @param use_resolution_levels A numeric vector specifying which resolution levels
 #' should be used in the fit.
 #' @param start A named list or named numeric vector of starting estimates. The
@@ -87,11 +87,11 @@ nls_adapter = function(...){
 #' @examples
 #' set.seed(10)
 #' fbm = fbmSim(n = 2 ^ 13, H = 0.4)
-#' vpr = WaveletVar(wd(fbm, bc = "symmetric"))
+#' vpr = waveletVar(wd(fbm, bc = "symmetric"))
 #' plot(vpr)
 #' # Estimate the fBm parameters using the largest resolution levels
 #' # since the estimates of their variances are better
-#' model = estimatefBmPars(vpr, use_resolution_levels = 5:12)
+#' model = estimateFbmPars(vpr, use_resolution_levels = 5:12)
 #' # The nls-fit is performed in semilog-space. Thus, a transformation
 #' # of the predicted values is required
 #' points(resolutionLevels(vpr),
@@ -100,7 +100,7 @@ nls_adapter = function(...){
 #'        pch = 2)
 #' # Since the estimates of the largest resolution levels are better we may
 #' # use a weigthed regression scheme
-#' wmodel = estimatefBmPars(vpr, use_resolution_levels = 5:12,
+#' wmodel = estimateFbmPars(vpr, use_resolution_levels = 5:12,
 #'                          use_weights = TRUE)
 #' points(resolutionLevels(vpr),
 #'        2 ^ predict(wmodel, newdata = data.frame(x = 0:12)),
@@ -111,19 +111,19 @@ nls_adapter = function(...){
 #' @section Warning:
 #' Do not use nls on artificial "zero-residual" data. See
 #' \code{\link[stats]{nls}} for further details.
-#' @seealso \code{\link{WaveletVar}}, \code{\link{theoreticalWaveletVar}}
+#' @seealso \code{\link{waveletVar}}, \code{\link{theoreticalWaveletVar}}
 #' @export
-estimatefBmPars = function(x, use_resolution_levels,
+estimateFbmPars = function(x, use_resolution_levels,
                            start = NULL, lower = NULL, upper = NULL,
                            use_weights = FALSE, algorithm = "port",
                            ...) {
-  UseMethod("estimatefBmPars", x)
+  UseMethod("estimateFbmPars", x)
 }
 
 
 
 #' @export
-estimatefBmPars.WaveletVar <- function(x,
+estimateFbmPars.waveletVar <- function(x,
                                        use_resolution_levels,
                                        start = NULL, lower = NULL, upper = NULL,
                                        use_weights = FALSE, algorithm = "port",
@@ -164,7 +164,7 @@ estimatefBmPars.WaveletVar <- function(x,
     weights = NULL
   }
 
-  fit = nls_adapter(formula = y ~ log2(functionToFit(x, H, sigma2)),
+  fit = nlsAdapter(formula = y ~ log2(functionToFit(x, H, sigma2)),
                     nls_data = nls_data,
                     weights = weights,
                     algorithm = algorithm,

@@ -1,5 +1,5 @@
 skip_on_cran()
-
+context("fBm simulation")
 library('fracdet', quietly = TRUE)
 
 test_that("fbmSim simulates the proper covariance structure", {

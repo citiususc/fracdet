@@ -9,7 +9,7 @@ estimateDetSignal(x, estimate_from, df = 5, nsim_bootstrap = 1000,
   rel_tol = 1e-07, nsubintv = 100000L, aggr_strategy = TRUE)
 }
 \arguments{
-\item{x}{A \code{Fracdet} object.}
+\item{x}{A \code{fracdet} object.}
 
 \item{estimate_from}{Numeric vector specifying which resolution levels of the
 wavelet transform should be used to estimate the deterministic signal.}
@@ -51,9 +51,9 @@ the \code{wr} function (\code{\link[wavethresh]{wr}}) may be used.
 \code{estimateDetSignal} estimates the deterministic signal based on a
 fractal-deterministic model that consists on a  linear superposition of a
 fractional brownian motion (fBm) \eqn{B} and a deterministic band-limited
-signal \eqn{x} (\eqn{S = x + B}). The model is represented (in wavelet
-domain) through a \code{Fracdet} object which also contains estimates of the
-fBm parameters (see \code{\link{Fracdet}}). To obtain the estimate of the
+signal \eqn{x} (\eqn{Y = x + B}). The model is represented (in wavelet
+domain) through a \code{fracdet} object which also contains estimates of the
+fBm parameters (see \code{\link{fracdet}}). To obtain the estimate of the
 deterministic component, all the knowledge we may have
 about the signals is exploited using a bayesian framework. This knowledge
 consist on:
@@ -63,7 +63,7 @@ statistical properties of the fBm signal).
 \item The well-known statistical properties of the fBm signals in wavelet
 domain.
 \item The deviations from the theoretical wavelet coefficients' variance
-(as a function of the resolution level) allow the estimation of the energy
+(as a function of the resolution level) permit the estimation of the energy
 distribution accross the resolution levels of the deterministic signal.
 }
 Using all this information, a bayesian model of the distribution
@@ -90,18 +90,18 @@ xlim = c(200, 400)
 H = 0.3
 # simulate a simple fbm + sinusal signal
 x = 1.25 * cospi(2 * 1:n / 10)
-s = fbmSim(n = n, H = H) + x
+y = fbmSim(n = n, H = H) + x
 # compute the wavelet transform and the wavelet coefficients' variances
-ws = wd(s, bc = "symmetric")
-vpr = WaveletVar(ws)
+wy = wd(y, bc = "symmetric")
+vpr = waveletVar(wy)
 # do you note the increase in variance in level 11?
 plot(vpr, xlim = c(4, nlevels - 1),
      ylim = range(vpr[5:nlevels]))
 # estimate the fBm parameters avoiding levels 11 and 12 (with deterministic
 # contributions). Level 12 is also avoid as a precaution
-model = estimatefBmPars(vpr, use_resolution_levels = c(5:10, 13))
-# Create a Fracdet object...
-fd = Fracdet(ws, model)
+model = estimateFbmPars(vpr, use_resolution_levels = c(5:10, 13))
+# Create a fracdet object...
+fd = fracdet(wy, model)
 # ... and check the fit
 print(coef(fd))
 # plot the experimental and the fitted wavelet's variances
@@ -116,22 +116,22 @@ wx = estimateDetSignal(fd, estimate_from = 11:12)
 x_est = wr(wx)
 # compare the original signal and the estimation
 old_par = par(mfrow = c(2,1))
-plot(s, xlim = xlim,
-     ylim = range(s[xlim[[1]]:xlim[[2]]]),
+plot(y, xlim = xlim,
+     ylim = range(y[xlim[[1]]:xlim[[2]]]),
      type = "l")
 lines(x, lty = 2, col = 2)
 legend("topright", lty = 1:2, col = 1:2,
-       legend = c("S", "x"), bty = "n")
+       legend = c("Y", "x"), bty = "n")
 plot(x, type = "l", xlim = xlim,
      ylim = range(x) * c(1, 2))
 lines(x_est, col = 2, lty = 2)
 legend("topright", lty = 1:2, col = 1:2,
-       legend = c("x", "x-estimate"), bty = "n")
+       legend = c("x", "x estimate"), bty = "n")
 par(old_par)
 }
 }
 \seealso{
 \code{\link[wavethresh]{wd}}, \code{\link[wavethresh]{wr}},
-\code{\link{Fracdet}}.
+\code{\link{fracdet}}.
 }
 

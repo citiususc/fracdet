@@ -1,5 +1,5 @@
 skip_on_cran()
-
+context("Theoretical wavelet variances")
 library('fracdet')
 data = readRDS("../testdata/vpr_data.RDS")
 

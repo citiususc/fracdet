@@ -1,5 +1,5 @@
 skip_on_cran()
-
+context("Deterministic signal estimation")
 library('fracdet', quietly = TRUE)
 
 test_that("estimateDetSignal provides reasonable estimations", {
@@ -24,12 +24,12 @@ test_that("estimateDetSignal provides reasonable estimations", {
       s = b + x
       plot(s, type= "l")
       ws = wd(s, bc = "symmetric")
-      vpr = WaveletVar(ws)
+      vpr = waveletVar(ws)
       use_resolution_levels = setdiff(4:(nlevels - 1), c(estimate_from,estimate_from + 1))
-      fit = fracdet::estimatefBmPars(vpr,
+      fit = fracdet::estimateFbmPars(vpr,
                                      use_resolution_levels)
       # print(coef(fit))
-      fdmodel = Fracdet(ws, fit)
+      fdmodel = fracdet(ws, fit)
       # plot(vpr,main = paste(H, j, snr))
       # points(getFittedWaveletVar(fdmodel),
       #        col = 2, pch = 24, bg = 2)

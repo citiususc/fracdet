@@ -7,16 +7,16 @@
 getWaveletVar(x)
 }
 \arguments{
-\item{x}{A \code{Fracdet} object.}
+\item{x}{A \code{fracdet} object.}
 }
 \value{
-A \code{WaveletVar} object representing the wavelet coefficients'
-variances of the wavelet transform represented by the \code{Fracdet} object.
+A \code{waveletVar} object representing the wavelet coefficients'
+variances of the wavelet transform represented by the \code{fracdet} object.
 }
 \description{
 Get the wavelet coefficients' variances
 }
 \seealso{
-\code{\link{Fracdet}}
+\code{\link{fracdet}}
 }
 

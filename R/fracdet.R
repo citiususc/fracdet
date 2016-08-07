@@ -15,20 +15,20 @@ checkFracdetArgs = function(x, fbmPars) {
 
 #' Fractal-deterministic model
 #'
-#' The \code{Fracdet} class represents a wavelet transform that is assumed to
+#' The \code{fracdet} class represents a wavelet transform that is assumed to
 #' be modelled  by a simple fractal-deterministic model with long-memory
 #' properties. The model consists on a  linear superposition of a fractional
 #' brownian motion (fBm) \eqn{B} and a deterministic band-limited signal
-#' \eqn{x}. That is, the observed signal is \eqn{Y = x + B}. The \code{Fracdet}
+#' \eqn{x}. That is, the observed signal is \eqn{Y = x + B}. The \code{fracdet}
 #' receives as parameters the wavelet transform of \eqn{Y} and an R fitted model
 #' object (\code{nls} or \code{lm}) containing the estimation of the parameters
 #' characterizing the fBm (The Hurst exponent \eqn{H} and the "dispersion"
-#' parameter \eqn{\sigma ^ 2}{sigma ^ 2}). The main method of the \code{Fracdet} class
+#' parameter \eqn{\sigma ^ 2}{sigma ^ 2}). The main method of the \code{fracdet} class
 #' is \code{estimateDetSignal}, which permits the estimation of the deterministic
 #' signal \eqn{x} using bayesian modelling techniques in the wavelet-domain.
 #'
-#' In addition to the specific methods for the \code{Fracdet} class, all the
-#' \code{wd} methods can be used with a \code{Fracdet} object.
+#' In addition to the specific methods for the \code{fracdet} class, all the
+#' \code{wd} methods can be used with a \code{fracdet} object.
 #'
 #' @param x A \code{wd} object representing the wavelet transform of the observed
 #' signal \eqn{Y}.
@@ -38,8 +38,8 @@ checkFracdetArgs = function(x, fbmPars) {
 #' exponent \eqn{H} and the "dispersion" parameter \eqn{\sigma ^ 2}{sigma ^ 2}).
 #' Thus, the names of the fitted variables are assumed to be \code{H} and
 #' \code{sigma2}.
-#' @return A S3 \code{Fracdet} object that represents the observed \eqn{Y} signal
-#' in the wavelet domain. The \code{Fracdet} object will also contain the
+#' @return A S3 \code{fracdet} object that represents the observed \eqn{Y} signal
+#' in the wavelet domain. The \code{fracdet} object will also contain the
 #' estimates of the fBm parameters.
 #' @note When computing the wavelet transform of the \eqn{Y} signal through the
 #' \code{wd} method (see \code{\link[wavethresh]{wd}}) we recommend using the
@@ -65,16 +65,16 @@ checkFracdetArgs = function(x, fbmPars) {
 #'        legend = c("Y", "x"), bty = "n")
 #' # compute the wavelet transform and the wavelet coefficients' variances
 #' wy = wd(y, bc = "symmetric")
-#' vpr = WaveletVar(wy)
+#' vpr = waveletVar(wy)
 #' # do you note the increase in variance in level 11?
 #' plot(vpr, xlim = c(4, nlevels - 1),
 #'      ylim = range(vpr[5:nlevels]))
 #' # estimate the fBm parameters avoiding levels 11 and 12 (with deterministic
 #' # contributions). Level 12 is also avoid as a precaution
-#' model = estimatefBmPars(vpr, use_resolution_levels = c(5:10, 13))
+#' model = estimateFbmPars(vpr, use_resolution_levels = c(5:10, 13))
 #'
-#' # Create a Fracdet object...
-#' fd = Fracdet(wy, model)
+#' # Create a fracdet object...
+#' fd = fracdet(wy, model)
 #' # ... and check the fbm parameters estimates
 #' coef(fd)
 #' # A plot of the fitted variances may be useful
@@ -85,7 +85,7 @@ checkFracdetArgs = function(x, fbmPars) {
 #' # we could also extract the nls-fit and use the predict function
 #' # The nls-fit is performed in semilog-space. Thus, a transformation
 #' # of the predicted values is required
-#' nls_model = getFbmPars(fd)
+#' nls_model = getWaveletVarModel(fd)
 #' points(resolutionLevels(vpr),
 #'        2 ^ predict(nls_model, newdata = data.frame(x = resolutionLevels(vpr))),
 #'        col = 3,
@@ -110,17 +110,17 @@ checkFracdetArgs = function(x, fbmPars) {
 #'        legend = c("x", "x estimate"), bty = "n")
 #' par(old_par)
 #' }
-#' @seealso \code{\link{WaveletVar}}, \code{\link{getWaveletVar}},
-#' \code{\link{getFbmPars}}, \code{\link{getFittedWaveletVar}},
+#' @seealso \code{\link{waveletVar}}, \code{\link{getWaveletVar}},
+#' \code{\link{getWaveletVarModel}}, \code{\link{getFittedWaveletVar}},
 #' \code{\link{as.wd}}, \code{\link{estimateDetSignal}}
 #' @export
-#' @exportClass Fracdet
+#' @exportClass fracdet
 #' @export
-Fracdet = function(x, fbmPars) {
+fracdet = function(x, fbmPars) {
   checkFracdetArgs(x, fbmPars)
-  attr(x, "WaveletVar") = WaveletVar(x)
+  attr(x, "waveletVar") = waveletVar(x)
   attr(x, "fbmPars") = fbmPars
-  class(x) = c("Fracdet", class(x))
+  class(x) = c("fracdet", class(x))
   x
 }
 
@@ -128,18 +128,18 @@ Fracdet = function(x, fbmPars) {
 
 #' Get the wavelet coefficients' variances
 #'
-#' @param x A \code{Fracdet} object.
-#' @return A \code{WaveletVar} object representing the wavelet coefficients'
-#' variances of the wavelet transform represented by the \code{Fracdet} object.
-#' @seealso \code{\link{Fracdet}}
+#' @param x A \code{fracdet} object.
+#' @return A \code{waveletVar} object representing the wavelet coefficients'
+#' variances of the wavelet transform represented by the \code{fracdet} object.
+#' @seealso \code{\link{fracdet}}
 #' @export
 getWaveletVar = function(x) {
   UseMethod("getWaveletVar", x)
 }
 
 #' @export
-getWaveletVar.Fracdet = function(x) {
-  attr(x, "WaveletVar")
+getWaveletVar.fracdet = function(x) {
+  attr(x, "waveletVar")
 }
 
 
@@ -147,27 +147,27 @@ getWaveletVar.Fracdet = function(x) {
 #' @inheritParams getWaveletVar
 #' @return Either a \code{nls} or a \code{lm} object representing the least-squared
 #' estimates of the fractional Brownian motion parameters.
-#' @seealso \code{\link{Fracdet}}, \code{\link{coef.Fracdet}}
+#' @seealso \code{\link{fracdet}}, \code{\link{coef.fracdet}}
 #' @export
-getFbmPars = function(x){
-  UseMethod("getFbmPars", x)
+getWaveletVarModel = function(x){
+  UseMethod("getWaveletVarModel", x)
 }
 
 #' @export
-getFbmPars.Fracdet = function(x){
+getWaveletVarModel.fracdet = function(x){
   attr(x, "fbmPars")
 }
 
 #' Extract fractional Brownian motion parameters
-#' @param object A \code{Fracdet} object.
+#' @param object A \code{fracdet} object.
 #' @param ... Ignored (used for S3 generic/method consistency).
 #' @return Named numeric vector with the least-squared
 #' estimates of the fractional Brownian motion parameters
 #' (\code{H} and \code{sigma2}).
-#' @seealso \code{\link{Fracdet}}
+#' @seealso \code{\link{fracdet}}
 #' @export
-coef.Fracdet = function(object, ...) {
-  coef(getFbmPars.Fracdet(object))
+coef.fracdet = function(object, ...) {
+  coef(getWaveletVarModel.fracdet(object))
 }
 
 #' Estimates of the wavelet variances of the fractional Brownian motion
@@ -177,17 +177,17 @@ coef.Fracdet = function(object, ...) {
 #' The variances estimates are obtained considering the theoretical wavelet
 #'  variance expression and the estimates of the fBm  parameters.
 #'
-#' @return A \code{WaveletVar} representing the estimates of the wavelet
+#' @return A \code{waveletVar} representing the estimates of the wavelet
 #' coefficients' variances of the fractional Brownian motion (fBm) part of the
 #' fractal-deterministic model.
-#' @seealso \code{\link{Fracdet}}, \code{\link{theoreticalWaveletVar}}
+#' @seealso \code{\link{fracdet}}, \code{\link{theoreticalWaveletVar}}
 #' @export
 getFittedWaveletVar = function(x){
   UseMethod("getFittedWaveletVar", x)
 }
 
 #' @export
-getFittedWaveletVar.Fracdet = function(x){
+getFittedWaveletVar.fracdet = function(x){
   fbm_pars = coef(x)
   theoreticalWaveletVar(fbm_pars[["H"]], fbm_pars[["sigma2"]],
                         x$filter$family,
@@ -196,11 +196,11 @@ getFittedWaveletVar.Fracdet = function(x){
 }
 
 #' @rdname getFittedWaveletVar
-#' @param x,object A \code{Fracdet} object.
+#' @param x,object A \code{fracdet} object.
 #' @param ... Ignored (used for S3 generic/method consistency).
 #' @export
-fitted.Fracdet = function(object, ...) {
-  getFittedWaveletVar.Fracdet(object)
+fitted.fracdet = function(object, ...) {
+  getFittedWaveletVar.fracdet(object)
 }
 
 #' Coerce to a wd object
@@ -215,7 +215,7 @@ as.wd = function(x) {
 
 #' @rdname as.wd
 #' @export
-as.wd.Fracdet = function(x){
+as.wd.fracdet = function(x){
   class(x) = "wd"
   x
 }
@@ -224,23 +224,23 @@ as.wd.Fracdet = function(x){
 # Required due to an error in the "wd" class, that checks the object class by
 # direct comparation instead of using inherits
 
-accessC.Fracdet = function(x, ...) { accessC.wd(as.wd(x), ...) }
-accessD.Fracdet = function(x, ...) { accessD.wd(as.wd(x), ...) }
-convert.Fracdet = function(x, ...) { convert.wd(as.wd(x), ...) }
-draw.Fracdet = function(x, ...) { draw.wd(as.wd(x), ...) }
-image.Fracdet = function(x, ...) { image.wd(as.wd(x), ...) }
-IsEarly.Fracdet = function(x) { IsEarly.wd(as.wd(x)) }
-LocalSpec.Fracdet = function(x, ...) { LocalSpec.wd(as.wd(x), ...) }
-modernise.Fracdet = function(x, ...) { modernise.wd(as.wd(x), ...) }
-nullevels.Fracdet = function(x, ...) { nullevels.wd(as.wd(x), ...) }
-plot.Fracdet = function(x, ...) { plot.wd(as.wd(x), ...) }
-print.Fracdet = function(x, ...) { print.wd(as.wd(x), ...) }
-putC.Fracdet = function(x, ...) { putC.wd(as.wd(x), ...) }
-putD.Fracdet = function(x, ...) { putD.wd(as.wd(x), ...) }
-summary.Fracdet = function(x, ...) { summary.wd(as.wd(x), ...) }
-threshold.Fracdet = function(x, ...) { threshold.wd(as.wd(x), ...) }
-WaveletVar.Fracdet = function(x, ...) { WaveletVar(as.wd(x), ...) }
-wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
+accessC.fracdet = function(x, ...) { accessC.wd(as.wd(x), ...) }
+accessD.fracdet = function(x, ...) { accessD.wd(as.wd(x), ...) }
+convert.fracdet = function(x, ...) { convert.wd(as.wd(x), ...) }
+draw.fracdet = function(x, ...) { draw.wd(as.wd(x), ...) }
+image.fracdet = function(x, ...) { image.wd(as.wd(x), ...) }
+IsEarly.fracdet = function(x) { IsEarly.wd(as.wd(x)) }
+LocalSpec.fracdet = function(x, ...) { LocalSpec.wd(as.wd(x), ...) }
+modernise.fracdet = function(x, ...) { modernise.wd(as.wd(x), ...) }
+nullevels.fracdet = function(x, ...) { nullevels.wd(as.wd(x), ...) }
+plot.fracdet = function(x, ...) { plot.wd(as.wd(x), ...) }
+print.fracdet = function(x, ...) { print.wd(as.wd(x), ...) }
+putC.fracdet = function(x, ...) { putC.wd(as.wd(x), ...) }
+putD.fracdet = function(x, ...) { putD.wd(as.wd(x), ...) }
+summary.fracdet = function(x, ...) { summary.wd(as.wd(x), ...) }
+threshold.fracdet = function(x, ...) { threshold.wd(as.wd(x), ...) }
+waveletVar.fracdet = function(x, ...) { waveletVar(as.wd(x), ...) }
+wr.fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 
 
 # estimateDetSignal -----------------------------------------------------------
@@ -251,8 +251,8 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' fractal-deterministic model that consists on a  linear superposition of a
 #' fractional brownian motion (fBm) \eqn{B} and a deterministic band-limited
 #' signal \eqn{x} (\eqn{Y = x + B}). The model is represented (in wavelet
-#' domain) through a \code{Fracdet} object which also contains estimates of the
-#' fBm parameters (see \code{\link{Fracdet}}). To obtain the estimate of the
+#' domain) through a \code{fracdet} object which also contains estimates of the
+#' fBm parameters (see \code{\link{fracdet}}). To obtain the estimate of the
 #' deterministic component, all the knowledge we may have
 #' about the signals is exploited using a bayesian framework. This knowledge
 #' consist on:
@@ -317,15 +317,15 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' y = fbmSim(n = n, H = H) + x
 #' # compute the wavelet transform and the wavelet coefficients' variances
 #' wy = wd(y, bc = "symmetric")
-#' vpr = WaveletVar(wy)
+#' vpr = waveletVar(wy)
 #' # do you note the increase in variance in level 11?
 #' plot(vpr, xlim = c(4, nlevels - 1),
 #'      ylim = range(vpr[5:nlevels]))
 #' # estimate the fBm parameters avoiding levels 11 and 12 (with deterministic
 #' # contributions). Level 12 is also avoid as a precaution
-#' model = estimatefBmPars(vpr, use_resolution_levels = c(5:10, 13))
-#' # Create a Fracdet object...
-#' fd = Fracdet(wy, model)
+#' model = estimateFbmPars(vpr, use_resolution_levels = c(5:10, 13))
+#' # Create a fracdet object...
+#' fd = fracdet(wy, model)
 #' # ... and check the fit
 #' print(coef(fd))
 #' # plot the experimental and the fitted wavelet's variances
@@ -354,7 +354,7 @@ wr.Fracdet = function(x, ...) { wr.wd(as.wd(x), ...) }
 #' par(old_par)
 #' }
 #' @seealso \code{\link[wavethresh]{wd}}, \code{\link[wavethresh]{wr}},
-#' \code{\link{Fracdet}}.
+#' \code{\link{fracdet}}.
 #' @export
 estimateDetSignal = function(x, estimate_from,
                              df = 5, nsim_bootstrap = 1000,
@@ -378,7 +378,7 @@ checkGKMethod = function(code){
 
 # gk_method = 1:6, corresponding to the 15, 21, 31, 41, 51 and 61 point Gauss-Kronrod rules
 #' @export
-estimateDetSignal.Fracdet = function(x, estimate_from,
+estimateDetSignal.fracdet = function(x, estimate_from,
                                      df = 5, nsim_bootstrap = 1000,
                                      amplitude_fraction = 0.01,
                                      signal_amplitude = NULL,
@@ -390,7 +390,7 @@ estimateDetSignal.Fracdet = function(x, estimate_from,
   vpr = getWaveletVar(x)
   nlevels = length(vpr)
   fitted_vpr = getFittedWaveletVar(x)
-  fitted_model = getFbmPars(x)
+  fitted_model = getWaveletVarModel(x)
   family = x$filter$family
   filter_number = x$filter$filter.number
   fitted_vpr_std = bootstrapWaveletVarError(fitted_model, nsim_bootstrap,

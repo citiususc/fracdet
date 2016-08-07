@@ -37,7 +37,7 @@ All the theoretical background is detailed in the paper:
 
 > García, C.A., Otero, A., Félix, P., Presedo, J. & Márquez D.G., (2016). Simultaneous estimation of deterministic and fractal components in non-stationary time series (in review).
 
-## The _WaveletVar_ class
+## The _waveletVar_ class
 According to a convenient modelling approach, long-memory signals can be 
 studied as realizations of one of two classes of processes: fractional Gaussian noise (fGn) or fractional Brownian motion (fBm). Since the increments of a fBm signal yield a stationary fGn signal, we may focus on the fBm model. Thus, we
 assume that $B$ can be approximated by a fBm.
@@ -48,7 +48,7 @@ self-similarity, which demands for a scale-dependent analysis. Thus, wavelet
 analysis provides a proper framework for studying fBm signals. Furthermore, it 
 is possible to estimate the fBm parameters by studying how the wavelet
 coefficients' variance depend on the resolution level. ___fracdet___ provides 
-the `WaveletVar` class for studying the wavelet coefficients' variances.
+the `waveletVar` class for studying the wavelet coefficients' variances.
 
 ```{r waveletVar, message=FALSE, warning = FALSE}
 library('fracdet')
@@ -61,7 +61,7 @@ H = 0.3
 b = fbmSim(n = n, H = H)
 wb = wd(b, bc = "symmetric")
 # Compute the wavelet coefficients variances and plot them.
-vpr = WaveletVar(wb)
+vpr = waveletVar(wb)
 plot(vpr)
 ```
 
@@ -71,24 +71,24 @@ the fBm. To estimate it, __fracdet__ provides the `estimatefBm` function, which
 is based on the `nls` R function:
 
 ```{r parameterEstimates}
-model = estimatefBmPars(vpr,
+model = estimateFbmPars(vpr,
                         use_resolution_levels = c(5:13))
 # 'model' is a nls object and thus,
 # we can obtain the parameter estimations with:
 print(coef(model))
 ```
 
-## The _Fracdet_ class
+## The _fracdet_ class
 What happens when our observed signal $Y$ may be approximated as 
 $Y[n] = x[n] + B[n]$?
 
 ```{r example}
 # simulate a simple fbm + sinusal signal.
-x = 1.25 * cospi(2 * 1:n / 10)
+x = 1.5 * cospi(2 * 1:n / 10)
 y = fbmSim(n = n, H = H) + x
 wy = wd(y, bc = "symmetric")
 # Compute the wavelet coefficients variances and plot them.
-vpr = WaveletVar(wy)
+vpr = waveletVar(wy)
 plot(vpr)
 ```
 
@@ -100,20 +100,20 @@ of the fBm parameters.
 ```{r parameterEstimatesII}
 # Ignore resolution levels 11 and 12 to obtain the 
 # fBm parameters estimates.
-model = estimatefBmPars(vpr,
+model = estimateFbmPars(vpr,
                         use_resolution_levels = c(5:10,13))
 
 ```
 
-The `Fracdet` class can now be used to ease the procedure of working with a signal that may fulfil the assumptions of our fractal-deterministic model. The 
-parameters required for the `Fracdet` constructor are the wavelet
+The `fracdet` class can now be used to ease the procedure of working with a signal that may fulfil the assumptions of our fractal-deterministic model. The 
+parameters required for the `fracdet` constructor are the wavelet
 transform of the observed signal,  and the fitted-model object used for
 estimating the fBm parameters. 
 
 
-```{r Fracdet}
-# Create a Fracdet object...
-fd = Fracdet(wy, model)
+```{r fracdetExample}
+# Create a fracdet object...
+fd = fracdet(wy, model)
 # ... and check the fbm parameters estimates.
 print(coef(fd))
 # A plot of the fitted variances may also be useful.
@@ -124,7 +124,7 @@ points(getFittedWaveletVar(fd),
 # we could also extract the nls-fit and use the predict function.
 # The nls-fit is performed in semilog-space. Thus, a transformation
 # of the predicted values is required.
-nls_model = getFbmPars(fd)
+nls_model = getWaveletVarModel(fd)
 points(resolutionLevels(vpr),
        2 ^ predict(nls_model, newdata = data.frame(x = resolutionLevels(vpr))),
        col = 3,
@@ -153,13 +153,13 @@ the decision rule that minimizes the posterior expected value of a squared loss
 function. The `estimateDetSignal` implements all these actions and returns the
 estimate of the wavelet transform of the deterministic signal:
 
-```{r signalEstimation, cache=TRUE}
+```{r signalEstimation}
 # Estimate the deterministic signal (this may take a while) taking
 # into account the deviations in level 11, 12. 
 wx = estimateDetSignal(fd, estimate_from = 11:12)
 x_est = wr(wx)
 # compare the original signal and the estimation
-xlim = c(300, 450)
+xlim = c(500, 650)
 offset = 2
 indx = xlim[[1]]:xlim[[2]]
 ylim = range(c(offset + y[indx],

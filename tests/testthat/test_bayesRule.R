@@ -1,5 +1,5 @@
 skip_on_cran()
-
+context("Bayes rule")
 library('fracdet', quietly = TRUE)
 
 test_that("bayes rule works as expected", {

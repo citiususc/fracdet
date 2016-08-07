@@ -8,4 +8,8 @@ Rplots.pdf
 *.so
 R/RcppExports.R
 inst/doc
-vignettes/quickstart_cache/
+vignettes/*_cache/
+vignettes/*.R
+vignettes/*.html
+vignettes/*_files/
+
