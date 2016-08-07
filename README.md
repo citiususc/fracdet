@@ -17,3 +17,6 @@ components in non-stationary time series** __(in review)__.
 library(devtools)
 install_github("citiususc/fracdet")
 ```
+
+## Quickstart
+For a quickstart guide, see this [vignette](https://citiususc.github.io/fracdet/pages/vignette.html).
