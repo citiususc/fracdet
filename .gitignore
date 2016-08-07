@@ -3,7 +3,6 @@ Rplots.pdf
 .Rhistory
 .RData
 .Ruserdata
-*.Rproj
 *.o
 *.so
 R/RcppExports.R
