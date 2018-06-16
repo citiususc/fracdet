@@ -13,8 +13,8 @@ Volumes 374–375, 1 July 2018, Pages 45-57. [link](https://www.sciencedirect.co
 ## Installation
 `fracdet` is not currently available on [CRAN](http://cran.r-project.org/), but it may be installed directly from github using [devtools](https://github.com/hadley/devtools).
 
-```
-library(devtools)
+```r
+library("devtools")
 install_version("FGN", "2.0-12")
 install_github("citiususc/fracdet")
 ```
