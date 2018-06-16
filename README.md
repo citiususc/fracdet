@@ -15,6 +15,7 @@ Volumes 374–375, 1 July 2018, Pages 45-57. [link](https://www.sciencedirect.co
 
 ```
 library(devtools)
+install_version("FGN", "2.0-12")
 install_github("citiususc/fracdet")
 ```
 
